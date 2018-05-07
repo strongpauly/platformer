@@ -4,10 +4,18 @@ import './Game.css';
 import {Player} from './Player';
 
 class Game extends React.Component<any, any> {
+    constructor(props: React.Props<any>) {
+        super(props);
+        this.state = {
+            x: 0,
+            y: 0
+        }
+    }
+
     public render() {
         return (
         <div className="game">
-            <Player x={0} y={0}/>
+            <Player x={this.state.x} y={this.state.y}/>
         </div>
         );
     }
@@ -20,17 +28,18 @@ class Game extends React.Component<any, any> {
         document.removeEventListener('keyup', this.onKeyPress);
     }
 
-    private onKeyPress(event: KeyboardEvent){
+    private onKeyPress = (event: KeyboardEvent) => {
         // tslint:disable-next-line
-        console.log(event);
         switch (event.key) {
             case "ArrowLeft" :
-              // tslint:disable-next-line
-                console.log('left');
+            this.setState({
+                x: this.state.x <= 1 ? 0 : this.state.x - 1
+            })
             break;
             case "ArrowRight" :
-              // tslint:disable-next-line
-                console.log('right');
+                this.setState({
+                    x: this.state.x + 1
+                })
             break;
             case "ArrowUp" :
               // tslint:disable-next-line
