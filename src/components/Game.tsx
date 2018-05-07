@@ -3,24 +3,42 @@ import {connect} from 'react-redux';
 import './Game.css';
 import {Player} from './Player';
 
-class Game extends React.Component {
+class Game extends React.Component<any, any> {
     public render() {
         return (
-        <div className="game" onKeyDown={this.onKeyPress} onMouseDown={this.onMouseDown}>
+        <div className="game">
             <Player x={0} y={0}/>
         </div>
         );
     }
 
-    private onKeyPress = (event: React.SyntheticEvent<any>) => {
-        // tslint:disable-next-line
-        console.log(event);
-        return;
+    public componentDidMount() {
+        document.addEventListener('keyup', this.onKeyPress);
+    }
+    
+    public componentWillUnmount() {
+        document.removeEventListener('keyup', this.onKeyPress);
     }
 
-    private onMouseDown = (event: React.SyntheticEvent<any>) => {
+    private onKeyPress(event: KeyboardEvent){
         // tslint:disable-next-line
         console.log(event);
+        switch (event.key) {
+            case "ArrowLeft" :
+              // tslint:disable-next-line
+                console.log('left');
+            break;
+            case "ArrowRight" :
+              // tslint:disable-next-line
+                console.log('right');
+            break;
+            case "ArrowUp" :
+              // tslint:disable-next-line
+                console.log('jump');
+            break;
+            default :
+                break;
+        }
         return;
     }
 }
