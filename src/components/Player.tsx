@@ -1,11 +1,8 @@
 import * as React from 'react';
+import { IShape } from './IShape';
 import './Player.css';
 
-interface IPlayerProps {
-    x: number; 
-    y: number; 
-}
-export class Player extends React.Component<IPlayerProps> {
+export class Player extends React.Component<IShape> {
 
     public render() {
         const style = {

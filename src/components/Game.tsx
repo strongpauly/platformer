@@ -1,26 +1,40 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
 import './Game.css';
+import { IShape } from './IShape';
+import {Platform} from './Platform';
 import {Player} from './Player';
 
 class Game extends React.Component<any, any> {
     private static JUMP_HEIGHT = 100;
     private static JUMP_TIME = 300;
     private static STEP_WIDTH = 20;
+    private static PLAYER_WIDTH = 20;
+    private static PLAYER_HEIGHT = 60;
 
     constructor(props: React.Props<any>) {
         super(props);
         this.state = {
             jumping: false,
+            platforms: [{
+                height: 20,
+                width: 60,
+                x: 200,
+                y: 20
+            }],
             x: 0,
             y: 0
         }
     }
 
     public render() {
+        const platforms = this.state.platforms.map( (platform:IShape, i:number) => 
+            <Platform key={i} x={platform.x} y={platform.y} height={platform.height} width={platform.width}/>
+        );
         return (
         <div className="game">
-            <Player x={this.state.x} y={this.state.y}/>
+            <Player x={this.state.x} y={this.state.y} width={Game.PLAYER_WIDTH} height={Game.PLAYER_HEIGHT}/>
+            {platforms}
         </div>
         );
     }
@@ -33,7 +47,7 @@ class Game extends React.Component<any, any> {
         document.removeEventListener('keyup', this.onKeyPress);
     }
 
-    public jump() {
+    private jump() {
         if (!this.state.jumping) {
             const baseY = this.state.y;
             this.setState({
@@ -61,17 +75,31 @@ class Game extends React.Component<any, any> {
         }
    }
 
+   private moveLeft() {
+       this.step({
+            height: Game.PLAYER_HEIGHT,
+            width: Game.PLAYER_WIDTH,
+            x: this.state.x <= Game.STEP_WIDTH ? 0 : this.state.x - Game.STEP_WIDTH,
+            y: this.state.y,
+       });
+   }
+
+    private moveRight() {
+        this.step({
+            height: Game.PLAYER_HEIGHT,
+            width: Game.PLAYER_WIDTH,
+            x: this.state.x + Game.STEP_WIDTH,
+            y: this.state.y,
+       });
+    }
+
     private onKeyPress = (event: KeyboardEvent) => {
         switch (event.key) {
             case "ArrowLeft" :
-                this.setState({
-                    x: this.state.x <= Game.STEP_WIDTH ? 0 : this.state.x - Game.STEP_WIDTH
-                });
+                this.moveLeft();
                 break;
             case "ArrowRight" :
-                this.setState({
-                    x: this.state.x + Game.STEP_WIDTH
-                })
+                this.moveRight();
                 break;
             case "ArrowUp" :
                this.jump();
@@ -80,6 +108,20 @@ class Game extends React.Component<any, any> {
                 break;
         }
         return;
+    }
+
+    private step(player: IShape) {
+        if(!this.willCollide(player)) {
+            this.setState({
+                x: player.x
+            });
+        }
+    }
+
+    private willCollide(shape: IShape): boolean {
+        return this.state.platforms.some( (platform:IShape) => {
+            return shape.x >= platform.x && shape.x <= platform.x + platform.width;
+        });
     }
 }
 
