@@ -7,6 +7,7 @@ class Game extends React.Component<any, any> {
     constructor(props: React.Props<any>) {
         super(props);
         this.state = {
+            jumping: false,
             x: 0,
             y: 0
         }
@@ -28,22 +29,36 @@ class Game extends React.Component<any, any> {
         document.removeEventListener('keyup', this.onKeyPress);
     }
 
+    public jump() {
+        if (!this.state.jumping) {
+            const baseY = this.state.y;
+            this.setState({
+                jumping: true,
+                y: baseY + 20
+              });
+              setTimeout( () => {
+                  this.setState({
+                      jumping: false,
+                      y: baseY
+                  });
+              }, 250);
+        }
+   }
+
     private onKeyPress = (event: KeyboardEvent) => {
-        // tslint:disable-next-line
         switch (event.key) {
             case "ArrowLeft" :
-            this.setState({
-                x: this.state.x <= 1 ? 0 : this.state.x - 1
-            })
+                this.setState({
+                    x: this.state.x <= 10 ? 0 : this.state.x - 10
+                });
             break;
             case "ArrowRight" :
                 this.setState({
-                    x: this.state.x + 1
+                    x: this.state.x + 10
                 })
             break;
             case "ArrowUp" :
-              // tslint:disable-next-line
-                console.log('jump');
+               this.jump();
             break;
             default :
                 break;
