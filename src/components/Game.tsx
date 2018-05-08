@@ -9,14 +9,15 @@ class Game extends React.Component<any, any> {
     private static JUMP_HEIGHT = 150;
     private static JUMP_TIME = 300;
     private static STEP_WIDTH = 20;
-    private static STEP_TIME = 100;
-    private static PLAYER_WIDTH = 20;
-    private static PLAYER_HEIGHT = 60;
-    private static ANIMATION_FREQUENCY = 10;
+    private static STEP_TIME = 150;
+    private static PLAYER_WIDTH = 30;
+    private static PLAYER_HEIGHT = 40;
+    private static ANIMATION_FREQUENCY = 15;
 
     constructor(props: React.Props<any>) {
         super(props);
         this.state = {
+            inverted: false,
             jumping: false,
             platforms: [{
                 height: 20,
@@ -35,7 +36,12 @@ class Game extends React.Component<any, any> {
         );
         return (
         <div className="game">
-            <Player x={this.state.x} y={this.state.y} width={Game.PLAYER_WIDTH} height={Game.PLAYER_HEIGHT}/>
+            <Player 
+                x={this.state.x} 
+                y={this.state.y} 
+                width={Game.PLAYER_WIDTH} 
+                height={Game.PLAYER_HEIGHT}
+                inverted={this.state.inverted}/>
             {platforms}
         </div>
         );
@@ -78,15 +84,21 @@ class Game extends React.Component<any, any> {
    }
 
    private moveLeft() {
+       this.setState({
+           inverted: true
+       });
        this.step({
             height: Game.PLAYER_HEIGHT,
-            width: Game.PLAYER_WIDTH,
+            width: Game.PLAYER_WIDTH,            
             x: this.state.x <= Game.STEP_WIDTH ? 0 : this.state.x - Game.STEP_WIDTH,
-            y: this.state.y,
+            y: this.state.y
        });
    }
 
     private moveRight() {
+        this.setState({
+            inverted: false
+        });
         this.step({
             height: Game.PLAYER_HEIGHT,
             width: Game.PLAYER_WIDTH,
@@ -133,7 +145,7 @@ class Game extends React.Component<any, any> {
                     stepping,
                     x: newX
                 });
-            }, Game.ANIMATION_FREQUENCY)
+            }, Game.ANIMATION_FREQUENCY);
         }
     }
 

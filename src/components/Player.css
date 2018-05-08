@@ -1,6 +1,16 @@
 .player {
-    width: 20px;
-    height: 60px;
-    background-color: red;
+    width: 30px;
+    height: 40px;
+    background-image: url('../player.png');
+    background-position-x: -6px;
     position: absolute;
+}
+
+.inverted {
+    -moz-transform: scaleX(-1);
+    -o-transform: scaleX(-1);
+    -webkit-transform: scaleX(-1);
+    transform: scaleX(-1);
+    filter: FlipH;
+    -ms-filter: "FlipH";
 }
