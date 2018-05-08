@@ -1,9 +1,23 @@
 .player {
-    width: 30px;
-    height: 40px;
     background-image: url('../player.png');
     background-position-x: -6px;
     position: absolute;
+}
+
+.player-run-0 {
+    background-position-x: 36px;
+}
+
+.player-run-1 {
+    background-position-x: 70px;
+}
+
+.player-run-2 {
+    background-position-x: 109px;
+}
+
+.player-run-3 {
+    background-position-x: 147px;
 }
 
 .inverted {

@@ -1,18 +1,12 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
+import * as Constants from './Constants';
 import './Game.css';
-import { IShape } from './IShape';
+import {IShape} from './IShape';
 import {Platform} from './Platform';
 import {Player} from './Player';
 
 class Game extends React.Component<any, any> {
-    private static JUMP_HEIGHT = 150;
-    private static JUMP_TIME = 300;
-    private static STEP_WIDTH = 20;
-    private static STEP_TIME = 150;
-    private static PLAYER_WIDTH = 30;
-    private static PLAYER_HEIGHT = 40;
-    private static ANIMATION_FREQUENCY = 15;
 
     constructor(props: React.Props<any>) {
         super(props);
@@ -39,9 +33,8 @@ class Game extends React.Component<any, any> {
             <Player 
                 x={this.state.x} 
                 y={this.state.y} 
-                width={Game.PLAYER_WIDTH} 
-                height={Game.PLAYER_HEIGHT}
-                inverted={this.state.inverted}/>
+                inverted={this.state.inverted}
+                jumping={this.state.jumping}/>
             {platforms}
         </div>
         );
@@ -64,22 +57,22 @@ class Game extends React.Component<any, any> {
             const time = Date.now();
             const jumpInterval = setInterval(() => {
                 const now = Date.now();
-                const percent = (now - time)/Game.JUMP_TIME;
+                const percent = (now - time)/Constants.JUMP_TIME;
                 let newY = baseY;
                 let jumping = true;
                 if (percent >= 1) { // Jump over
                     jumping = false;
                     clearInterval(jumpInterval);
                 } else if (percent <= 0.5) { // On way up.
-                    newY += (Game.JUMP_HEIGHT * percent * 2)
+                    newY += (Constants.JUMP_HEIGHT * percent * 2)
                 } else { // On way down.
-                    newY += Game.JUMP_HEIGHT * (1 - percent) * 2
+                    newY += Constants.JUMP_HEIGHT * (1 - percent) * 2
                 }
                 this.setState({
                     jumping,
                     y: newY
                 });
-            }, Game.ANIMATION_FREQUENCY);
+            }, Constants.ANIMATION_FREQUENCY);
         }
    }
 
@@ -88,9 +81,9 @@ class Game extends React.Component<any, any> {
            inverted: true
        });
        this.step({
-            height: Game.PLAYER_HEIGHT,
-            width: Game.PLAYER_WIDTH,            
-            x: this.state.x <= Game.STEP_WIDTH ? 0 : this.state.x - Game.STEP_WIDTH,
+            height: Constants.PLAYER_HEIGHT,
+            width: Constants.PLAYER_WIDTH,            
+            x: this.state.x <= Constants.STEP_WIDTH ? 0 : this.state.x - Constants.STEP_WIDTH,
             y: this.state.y
        });
    }
@@ -100,9 +93,9 @@ class Game extends React.Component<any, any> {
             inverted: false
         });
         this.step({
-            height: Game.PLAYER_HEIGHT,
-            width: Game.PLAYER_WIDTH,
-            x: this.state.x + Game.STEP_WIDTH,
+            height: Constants.PLAYER_HEIGHT,
+            width: Constants.PLAYER_WIDTH,
+            x: this.state.x + Constants.STEP_WIDTH,
             y: this.state.y,
        });
     }
@@ -133,7 +126,7 @@ class Game extends React.Component<any, any> {
             });
             const stepInterval = setInterval(() => {
                 const now = Date.now();
-                const percent = (now - time)/Game.STEP_TIME;
+                const percent = (now - time)/Constants.STEP_TIME;
                 let newX = startX + ((player.x - startX)* percent);
                 let stepping = true;
                 if (percent >= 1) { // step over
@@ -145,7 +138,7 @@ class Game extends React.Component<any, any> {
                     stepping,
                     x: newX
                 });
-            }, Game.ANIMATION_FREQUENCY);
+            }, Constants.ANIMATION_FREQUENCY);
         }
     }
 
