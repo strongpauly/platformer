@@ -4,6 +4,10 @@ import './Game.css';
 import {Player} from './Player';
 
 class Game extends React.Component<any, any> {
+    private static JUMP_HEIGHT = 100;
+    private static JUMP_TIME = 300;
+    private static STEP_WIDTH = 20;
+
     constructor(props: React.Props<any>) {
         super(props);
         this.state = {
@@ -33,15 +37,27 @@ class Game extends React.Component<any, any> {
         if (!this.state.jumping) {
             const baseY = this.state.y;
             this.setState({
-                jumping: true,
-                y: baseY + 20
-              });
-              setTimeout( () => {
-                  this.setState({
-                      jumping: false,
-                      y: baseY
-                  });
-              }, 250);
+                jumping: true
+            });
+            const time = Date.now();
+            const jumpInterval = setInterval(() => {
+                const now = Date.now();
+                const percent = (now - time)/Game.JUMP_TIME;
+                let newY = baseY;
+                let jumping = true;
+                if (percent > 1) { // Jump over
+                    jumping = false;
+                    clearInterval(jumpInterval);
+                } else if (percent <= 0.5) { // On way up.
+                    newY += (Game.JUMP_HEIGHT * percent * 2)
+                } else { // On way down.
+                    newY += Game.JUMP_HEIGHT * (1 - percent) * 2
+                }
+                this.setState({
+                    jumping,
+                    y: newY
+                });
+            }, 1);
         }
    }
 
@@ -49,17 +65,17 @@ class Game extends React.Component<any, any> {
         switch (event.key) {
             case "ArrowLeft" :
                 this.setState({
-                    x: this.state.x <= 10 ? 0 : this.state.x - 10
+                    x: this.state.x <= Game.STEP_WIDTH ? 0 : this.state.x - Game.STEP_WIDTH
                 });
-            break;
+                break;
             case "ArrowRight" :
                 this.setState({
-                    x: this.state.x + 10
+                    x: this.state.x + Game.STEP_WIDTH
                 })
-            break;
+                break;
             case "ArrowUp" :
                this.jump();
-            break;
+                break;
             default :
                 break;
         }
