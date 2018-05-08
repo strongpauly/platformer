@@ -6,11 +6,13 @@ import {Platform} from './Platform';
 import {Player} from './Player';
 
 class Game extends React.Component<any, any> {
-    private static JUMP_HEIGHT = 100;
+    private static JUMP_HEIGHT = 150;
     private static JUMP_TIME = 300;
     private static STEP_WIDTH = 20;
+    private static STEP_TIME = 100;
     private static PLAYER_WIDTH = 20;
     private static PLAYER_HEIGHT = 60;
+    private static ANIMATION_FREQUENCY = 10;
 
     constructor(props: React.Props<any>) {
         super(props);
@@ -40,11 +42,11 @@ class Game extends React.Component<any, any> {
     }
 
     public componentDidMount() {
-        document.addEventListener('keyup', this.onKeyPress);
+        document.addEventListener('keydown', this.onKeyPress);
     }
     
     public componentWillUnmount() {
-        document.removeEventListener('keyup', this.onKeyPress);
+        document.removeEventListener('keydown', this.onKeyPress);
     }
 
     private jump() {
@@ -59,7 +61,7 @@ class Game extends React.Component<any, any> {
                 const percent = (now - time)/Game.JUMP_TIME;
                 let newY = baseY;
                 let jumping = true;
-                if (percent > 1) { // Jump over
+                if (percent >= 1) { // Jump over
                     jumping = false;
                     clearInterval(jumpInterval);
                 } else if (percent <= 0.5) { // On way up.
@@ -71,7 +73,7 @@ class Game extends React.Component<any, any> {
                     jumping,
                     y: newY
                 });
-            }, 1);
+            }, Game.ANIMATION_FREQUENCY);
         }
    }
 
@@ -111,16 +113,34 @@ class Game extends React.Component<any, any> {
     }
 
     private step(player: IShape) {
-        if(!this.willCollide(player)) {
+        if(!this.willCollide(player) && !this.state.stepping) {
+            const time = Date.now();
+            const startX = this.state.x;
             this.setState({
-                x: player.x
+                stepping: true
             });
+            const stepInterval = setInterval(() => {
+                const now = Date.now();
+                const percent = (now - time)/Game.STEP_TIME;
+                let newX = startX + ((player.x - startX)* percent);
+                let stepping = true;
+                if (percent >= 1) { // step over
+                    newX = player.x;
+                    stepping = false;
+                    clearInterval(stepInterval);
+                } 
+                this.setState({
+                    stepping,
+                    x: newX
+                });
+            }, Game.ANIMATION_FREQUENCY)
         }
     }
 
     private willCollide(shape: IShape): boolean {
-        return this.state.platforms.some( (platform:IShape) => {
-            return shape.x >= platform.x && shape.x <= platform.x + platform.width;
+        return this.state.platforms.some((platform:IShape) => {
+            return (shape.x >= platform.x && shape.x <= platform.x + platform.width) ||
+                (shape.y >= platform.y && shape.y <= platform.y + platform.height);
         });
     }
 }
