@@ -2,6 +2,7 @@
   "name": "platformer",
   "version": "0.1.0",
   "private": true,
+  "homepage": "http://paul.potsides.com/platformer",
   "dependencies": {
     "@types/react-redux": "^5.0.19",
     "@types/redux-logger": "^3.0.6",
