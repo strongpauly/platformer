@@ -90,7 +90,6 @@ class Game extends React.Component<any, any> {
                     falling = false;
                     clearInterval(this.fallInterval);
                 }
-                console.log(falling);
                 this.setState({
                     falling,
                     y: newY
@@ -100,8 +99,9 @@ class Game extends React.Component<any, any> {
     }
 
     private finishStep() {
-        if (this.state.stepping) {
+        if (!isNaN(this.stepInterval)) {
             clearInterval(this.stepInterval);
+            this.stepInterval = NaN;
             this.setState({
                 stepping: false
             });
@@ -208,7 +208,7 @@ class Game extends React.Component<any, any> {
     }
 
     private step(player: IShape) {
-        if (!this.state.stepping) {
+        if (isNaN(this.stepInterval)) {
             const time = Date.now();
             this.setState({
                 stepStart: time,
@@ -218,18 +218,20 @@ class Game extends React.Component<any, any> {
             const increment = player.x - this.state.x;
             this.stepInterval = setInterval(() => {
                 newX += increment;
+                let stepping = true;
                 const newY = this.willCollide({
                     ...player,
                     x: newX
                 });
-                if(isNaN(newY) || newY >= 0) {
-                    this.setState({
-                        x: newX
-                    });
-                } else {
-                    this.finishStep();
+                if(newY === -1) {
+                   newX = this.state.x;
+                   stepping = false;
                 }
-                if (!isNaN(newY) && newY !== this.state.y && !this.state.jumping) {
+                this.setState({
+                    stepping,
+                    x: newX
+                });
+                if (!isNaN(newY) && newY !== this.state.y && !this.state.jumping && stepping) {
                     this.fall();
                 }
             }, Constants.STEP_SPEED);
