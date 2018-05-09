@@ -11,6 +11,7 @@ import {Player} from './Player';
 class Game extends React.Component<any, any> {
 
     private stepInterval: any;
+    private fallInterval: any;
 
     constructor(props: React.Props<any>) {
         super(props);
@@ -72,7 +73,7 @@ class Game extends React.Component<any, any> {
                 falling: true
             });
             const fallIncrement = 5
-            const fallInterval = setInterval(() => {
+            this.fallInterval = setInterval(() => {
                 let newY = this.state.y - fallIncrement;
                 let to = this.willCollide({
                     height: Constants.PLAYER_HEIGHT,
@@ -87,8 +88,9 @@ class Game extends React.Component<any, any> {
                 if (newY <= to) {
                     newY = to;
                     falling = false;
-                    clearInterval(fallInterval);
+                    clearInterval(this.fallInterval);
                 }
+                console.log(falling);
                 this.setState({
                     falling,
                     y: newY
@@ -227,7 +229,7 @@ class Game extends React.Component<any, any> {
                 } else {
                     this.finishStep();
                 }
-                if (!isNaN(newY) && newY === 0 && !this.state.jumping) {
+                if (!isNaN(newY) && newY !== this.state.y && !this.state.jumping) {
                     this.fall();
                 }
             }, Constants.STEP_SPEED);

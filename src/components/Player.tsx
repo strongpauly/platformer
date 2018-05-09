@@ -19,7 +19,7 @@ export class Player extends React.Component<IPlayer> {
             bottom: this.props.y,
             height: Constants.PLAYER_HEIGHT,
             left: this.props.x,
-            width: Constants.PLAYER_WIDTH,
+            width: 30,
         }
         const classNames = ["player"];
         

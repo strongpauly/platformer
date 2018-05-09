@@ -4,6 +4,6 @@ export const STEP_WIDTH = 1;
 export const STEP_TIME = 100;
 export const STEP_FRAMES = 7;
 export const STEP_SPEED = 6;
-export const PLAYER_WIDTH = 30;
+export const PLAYER_WIDTH = 18;
 export const PLAYER_HEIGHT = 40;
 export const ANIMATION_FREQUENCY = 15;
