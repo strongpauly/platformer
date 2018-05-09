@@ -20,6 +20,21 @@
     background-position-x: 147px;
 }
 
+.jumping-up {
+    background-position-x: 298px;
+    background-position-y: -76px;
+}
+
+.jumping-apex {
+    background-position-x: 263px;
+    background-position-y: -76px;
+}
+
+.jumping-down {
+    background-position-x: 226px;
+    background-position-y: -76px;
+}
+
 .inverted {
     -moz-transform: scaleX(-1);
     -o-transform: scaleX(-1);

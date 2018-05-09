@@ -6,6 +6,7 @@ import './Player.css';
 export interface IPlayer extends IPosition {
     inverted: boolean;
     jumping: boolean;
+    jumpStart: number;
 }
 
 export class Player extends React.Component<IPlayer> {
@@ -17,20 +18,30 @@ export class Player extends React.Component<IPlayer> {
             left: this.props.x,
             width: Constants.PLAYER_WIDTH,
         }
-        let className = "player";
+        const classNames = ["player"];
         let animation = 0;
-        if (this.props.x % Constants.STEP_WIDTH !== 0) {
+        if (this.props.jumping) {
+            const now = Date.now();
+            const percent = (now - this.props.jumpStart)/Constants.JUMP_TIME;
+            if (percent <= 0.33) {
+                classNames.push("jumping-up");
+            } else if(percent <= 0.66) {
+                classNames.push("jumping-apex");
+            } else {
+                classNames.push("jumping-down");
+            }
+        } else if (this.props.x % Constants.STEP_WIDTH !== 0) {
             animation = Math.floor(this.props.x % Constants.STEP_WIDTH / (Constants.STEP_FRAMES + 1));
             if (this.props.inverted) {
                 animation = Math.abs(Constants.STEP_FRAMES - 1 - animation);
             }
-            className += ' player-run-' + animation;
+            classNames.push('player-run-' + animation);
         }
         if (this.props.inverted) {
-            className += " inverted";
+            classNames.push("inverted");
         }
         return (
-        <div className={className} style={style}/>
+        <div className={classNames.join(" ")} style={style}/>
         );
     }
 }

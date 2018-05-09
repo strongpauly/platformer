@@ -12,6 +12,7 @@ class Game extends React.Component<any, any> {
         super(props);
         this.state = {
             inverted: false,
+            jumpStart: NaN,
             jumping: false,
             platforms: [{
                 height: 20,
@@ -34,7 +35,8 @@ class Game extends React.Component<any, any> {
                 x={this.state.x} 
                 y={this.state.y} 
                 inverted={this.state.inverted}
-                jumping={this.state.jumping}/>
+                jumping={this.state.jumping}
+                jumpStart={this.state.jumpStart}/>
             {platforms}
         </div>
         );
@@ -51,10 +53,11 @@ class Game extends React.Component<any, any> {
     private jump() {
         if (!this.state.jumping) {
             const baseY = this.state.y;
+            const time = Date.now();
             this.setState({
+                jumpStart: time,
                 jumping: true
             });
-            const time = Date.now();
             const jumpInterval = setInterval(() => {
                 const now = Date.now();
                 const percent = (now - time)/Constants.JUMP_TIME;

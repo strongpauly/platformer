@@ -1,5 +1,5 @@
 export const JUMP_HEIGHT = 150;
-export const JUMP_TIME = 300;
+export const JUMP_TIME = 400;
 export const STEP_WIDTH = 20;
 export const STEP_TIME = 200;
 export const STEP_FRAMES = 4;
