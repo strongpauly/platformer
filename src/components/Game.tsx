@@ -16,6 +16,7 @@ class Game extends React.Component<any, any> {
     constructor(props: React.Props<any>) {
         super(props);
         this.state = {
+            hasGun: Math.random() > 0.5,
             inverted: false,
             jumpStart: NaN,
             jumping: false,
@@ -51,7 +52,8 @@ class Game extends React.Component<any, any> {
                 jumpStart={this.state.jumpStart}
                 stepping={this.state.stepping}
                 stepStart={this.state.stepStart}
-                falling={this.state.falling}/>
+                falling={this.state.falling}
+                hasGun={this.state.hasGun}/>
             {platforms}
         </div>
         );

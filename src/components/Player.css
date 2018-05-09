@@ -5,6 +5,10 @@
     position: absolute;
 }
 
+.with-gun {
+    background-position-y: -38px;
+}
+
 .player-run-0 {
     background-position-x: 36px;
 }
@@ -50,6 +54,18 @@
 .jumping-down {
     background-position-x: 226px;
     background-position-y: -76px;
+}
+
+.jumping-up.with-gun {
+    background-position-x: 186px;
+}
+
+.jumping-apex.with-gun {
+    background-position-x: 147px;
+}
+
+.jumping-down.with-gun {
+    background-position-x: 109px;
 }
 
 .inverted {

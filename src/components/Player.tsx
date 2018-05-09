@@ -10,6 +10,7 @@ export interface IPlayer extends IPosition {
     falling: boolean;
     stepping: boolean;
     stepStart: number;
+    hasGun: boolean;
 }
 
 export class Player extends React.Component<IPlayer> {
@@ -22,7 +23,9 @@ export class Player extends React.Component<IPlayer> {
             width: 30,
         }
         const classNames = ["player"];
-        
+        if(this.props.hasGun) {
+            classNames.push('with-gun');
+        }
         const now = Date.now();
         if (this.props.jumping) {
             const percent = (now - this.props.jumpStart)/Constants.JUMP_TIME;
