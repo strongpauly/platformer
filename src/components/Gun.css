@@ -1,0 +1,9 @@
+.gun {
+    background-image: url('../assets/guns.png');
+    background-position-x: 46px;
+    background-position-y: -3px;
+    position: absolute;
+    width: 16px;
+    height: 13px;
+    background-size: 100px 100px;
+}

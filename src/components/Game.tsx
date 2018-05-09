@@ -1,9 +1,10 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
+import { intersects } from '../utils/intersects';
 import * as Constants from './Constants';
 import './Game.css';
-
-import { intersects } from '../utils/intersects';
+import { Gun } from './Gun';
+import { IPosition } from './IPosition';
 import {IShape} from './IShape';
 import {Platform} from './Platform';
 import {Player} from './Player';
@@ -16,7 +17,11 @@ class Game extends React.Component<any, any> {
     constructor(props: React.Props<any>) {
         super(props);
         this.state = {
-            hasGun: Math.random() > 0.5,
+            guns: [{
+                x: 380,
+                y: 70
+            }],
+            hasGun: false,
             inverted: false,
             jumpStart: NaN,
             jumping: false,
@@ -42,6 +47,9 @@ class Game extends React.Component<any, any> {
         const platforms = this.state.platforms.map( (platform:IShape, i:number) => 
             <Platform key={i} x={platform.x} y={platform.y} height={platform.height} width={platform.width}/>
         );
+        const guns = this.state.guns.map( (gun:IPosition, i:number) => 
+            <Gun key={i} x={gun.x} y={gun.y}/>
+        );
         return (
         <div className="game">
             <Player 
@@ -55,6 +63,7 @@ class Game extends React.Component<any, any> {
                 falling={this.state.falling}
                 hasGun={this.state.hasGun}/>
             {platforms}
+            {guns}
         </div>
         );
     }
@@ -67,6 +76,30 @@ class Game extends React.Component<any, any> {
     public componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown);
         document.addEventListener('keyup', this.onKeyUp);
+    }
+
+    private checkPowerUps() {
+        const player: IShape = {
+            height: Constants.PLAYER_HEIGHT,
+            width: Constants.PLAYER_WIDTH,            
+            x: this.state.x,
+            y: this.state.y
+        }
+        if (!this.state.hasGun && this.state.guns) {
+            const powerUp = this.state.guns.find( (gun: IPosition) => 
+                intersects(player, {
+                    ...gun,
+                    height: Constants.GUN_HEIGHT,
+                    width: Constants.GUN_WIDTH
+                })
+            )
+            if (powerUp) {
+                this.setState({
+                    guns: this.state.guns.filter( (gun: IPosition) => gun.x !== powerUp.x && gun.y !== powerUp.y),
+                    hasGun: true
+                });
+            }
+        }
     }
 
     private fall() {
@@ -96,6 +129,7 @@ class Game extends React.Component<any, any> {
                     falling,
                     y: newY
                 });
+                this.checkPowerUps();
             }, Constants.ANIMATION_FREQUENCY);
         }
     }
@@ -152,6 +186,7 @@ class Game extends React.Component<any, any> {
                     jumping,
                     y: newY
                 });
+                this.checkPowerUps();
             }, Constants.ANIMATION_FREQUENCY);
         }
    }
@@ -233,6 +268,7 @@ class Game extends React.Component<any, any> {
                     stepping,
                     x: newX
                 });
+                this.checkPowerUps();
                 if (!isNaN(newY) && newY !== this.state.y && !this.state.jumping && stepping) {
                     this.fall();
                 }

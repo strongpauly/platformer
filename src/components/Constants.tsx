@@ -6,4 +6,6 @@ export const STEP_FRAMES = 7;
 export const STEP_SPEED = 6;
 export const PLAYER_WIDTH = 18;
 export const PLAYER_HEIGHT = 39;
+export const GUN_WIDTH = 15;
+export const GUN_HEIGHT = 15;
 export const ANIMATION_FREQUENCY = 15;
