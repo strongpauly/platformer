@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
 import { intersects } from '../utils/intersects';
+import { Bullet } from './Bullet';
 import * as Constants from './Constants';
 import './Game.css';
 import { Gun } from './Gun';
@@ -17,6 +18,8 @@ class Game extends React.Component<any, any> {
     constructor(props: React.Props<any>) {
         super(props);
         this.state = {
+            bulletCount: 0,
+            bullets: [],
             guns: [{
                 x: 380,
                 y: 70
@@ -29,7 +32,7 @@ class Game extends React.Component<any, any> {
                 height: 20,
                 width: 120,
                 x: 210,
-                y: 20
+                y: 15
             }, {
                 height: 20,
                 width: 90,
@@ -50,6 +53,9 @@ class Game extends React.Component<any, any> {
         const guns = this.state.guns.map( (gun:IPosition, i:number) => 
             <Gun key={i} x={gun.x} y={gun.y}/>
         );
+        const bullets = this.state.bullets.map( (bullet:any, i:number) => 
+            <Bullet key={bullet.id} x={bullet.x} y={bullet.y}/>
+        );
         return (
         <div className="game">
             <Player 
@@ -64,6 +70,7 @@ class Game extends React.Component<any, any> {
                 hasGun={this.state.hasGun}/>
             {platforms}
             {guns}
+            {bullets}
         </div>
         );
     }
@@ -141,6 +148,44 @@ class Game extends React.Component<any, any> {
             this.setState({
                 stepping: false
             });
+        }
+    }
+
+    private fireGun() {
+        if (this.state.hasGun) {
+            const bullet = {
+                id: this.state.bulletCount + 1,
+                x: this.state.x + 5,
+                y: this.state.y + 13
+            };
+            let bulletIncrement = 10;
+            if (this.state.inverted) {
+                bulletIncrement = -bulletIncrement;
+            }
+            this.setState({
+                bulletCount: this.state.bulletCount + 1,
+                bullets: this.state.bullets.concat(bullet)
+            });
+            const bulletInterval = setInterval(() => {
+                let newBullets = this.state.bullets;
+                const newX = bullet.x + bulletIncrement;
+                const collided = this.intersects({
+                    height: 5,
+                    width: 5,
+                    x: newX,
+                    y: bullet.y
+                });
+                if (collided || newX < 0 || newX > this.state.x + 1000) {
+                    clearInterval(bulletInterval);
+                    newBullets = newBullets.filter((b:any) => b.id !== bullet.id);
+                } else {
+                    bullet.x = newX;
+                }
+                this.setState({
+                    bullets: newBullets
+                });
+            }, Constants.ANIMATION_FREQUENCY)
+            
         }
     }
 
@@ -224,8 +269,12 @@ class Game extends React.Component<any, any> {
                 this.moveRight();
                 break;
             case "ArrowUp" :
-               this.jump();
+                this.jump();
                 break;
+            case " " : 
+                this.fireGun();
+                break;
+            
             default :
                 break;
         }
@@ -274,6 +323,16 @@ class Game extends React.Component<any, any> {
                 }
             }, Constants.STEP_SPEED);
         }
+    }
+
+    private intersects(shape: IShape): IShape | undefined {
+        const collided = this.state.platforms.find((platform:IShape) => {
+            return intersects(shape, platform);
+        });
+        if (collided) {
+            return collided;
+        }
+        return;
     }
 
     /**

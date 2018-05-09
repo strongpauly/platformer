@@ -1,0 +1,7 @@
+.bullet {
+    position: absolute;
+    background: linear-gradient(red, blue, red);
+    border: 1px solid black;
+    width: 5px;
+    height: 5px;
+}
