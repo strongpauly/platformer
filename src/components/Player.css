@@ -21,6 +21,22 @@
     background-position-x: 147px;
 }
 
+.player-run-4 {
+    background-position-x: 182px;
+}
+
+.player-run-5 {
+    background-position-x: 223px;
+}
+
+.player-run-6 {
+    background-position-x: 260px;
+}
+
+.player-run-7 {
+    background-position-x: 297px;
+}
+
 .jumping-up {
     background-position-x: 298px;
     background-position-y: -76px;

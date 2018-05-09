@@ -8,6 +8,8 @@ export interface IPlayer extends IPosition {
     jumping: boolean;
     jumpStart: number;
     falling: boolean;
+    stepping: boolean;
+    stepStart: number;
 }
 
 export class Player extends React.Component<IPlayer> {
@@ -20,9 +22,9 @@ export class Player extends React.Component<IPlayer> {
             width: Constants.PLAYER_WIDTH,
         }
         const classNames = ["player"];
-        let animation = 0;
+        
+        const now = Date.now();
         if (this.props.jumping) {
-            const now = Date.now();
             const percent = (now - this.props.jumpStart)/Constants.JUMP_TIME;
             if (percent <= 0.33) {
                 classNames.push("jumping-up");
@@ -33,11 +35,8 @@ export class Player extends React.Component<IPlayer> {
             }
         } else if (this.props.falling){
             classNames.push('jumping-down');
-        } else if (this.props.x % Constants.STEP_WIDTH !== 0) {
-            animation = Math.floor(this.props.x % Constants.STEP_WIDTH / (Constants.STEP_FRAMES + 1));
-            if (this.props.inverted) {
-                animation = Math.abs(Constants.STEP_FRAMES - 1 - animation);
-            }
+        } else if (this.props.stepping) {
+            const animation = Math.floor((now - this.props.stepStart) / Constants.STEP_TIME % (Constants.STEP_FRAMES));
             classNames.push('player-run-' + animation);
         }
         if (this.props.inverted) {
