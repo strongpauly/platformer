@@ -20,6 +20,11 @@ class Game extends React.Component<any, any> {
                 width: 60,
                 x: 210,
                 y: 20
+            }, {
+                height: 20,
+                width: 90,
+                x: 360,
+                y: 40
             }],
             stepping: false,
             x: 0,
@@ -38,7 +43,8 @@ class Game extends React.Component<any, any> {
                 y={this.state.y} 
                 inverted={this.state.inverted}
                 jumping={this.state.jumping}
-                jumpStart={this.state.jumpStart}/>
+                jumpStart={this.state.jumpStart}
+                falling={this.state.falling}/>
             {platforms}
         </div>
         );
@@ -50,6 +56,27 @@ class Game extends React.Component<any, any> {
     
     public componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyPress);
+    }
+
+    private fall(to:number) {
+        if (!this.state.falling) {
+            this.setState({
+                falling: true
+            });
+            const fallInterval = setInterval(() => {
+                let newY = this.state.y - 5;
+                let falling = true;
+                if (newY <= to) {
+                    newY = to;
+                    falling = false;
+                    clearInterval(fallInterval);
+                }
+                this.setState({
+                    falling,
+                    y: newY
+                });
+            }, Constants.ANIMATION_FREQUENCY);
+        }
     }
 
     private jump() {
@@ -129,7 +156,7 @@ class Game extends React.Component<any, any> {
 
     private step(player: IShape) {
         const newY = this.willCollide(player);
-        if((isNaN(newY) || newY > 0) && !this.state.stepping) {
+        if((isNaN(newY) || newY >= 0) && !this.state.stepping) {
             const time = Date.now();
             const startX = this.state.x;
             this.setState({
@@ -144,6 +171,10 @@ class Game extends React.Component<any, any> {
                     newX = player.x;
                     stepping = false;
                     clearInterval(stepInterval);
+                    // TODO: Need to distinguish between falling to floor and falling onto another platform.
+                    if (!isNaN(newY) && newY === 0) {
+                        this.fall(0);
+                    }
                 }
                 if (newY > 0) { // Jumping onto platform.
                     this.setState({
@@ -155,6 +186,7 @@ class Game extends React.Component<any, any> {
                     x: newX
                 });
             }, Constants.ANIMATION_FREQUENCY);
+            
         }
     }
 
@@ -170,6 +202,12 @@ class Game extends React.Component<any, any> {
                 // Walked into platform.
                 return -1;
             }
+        // Falling off platform    
+        } else if (!isNaN(this.state.platformY)) {
+            this.setState({
+                platformY: NaN
+            });
+            return 0;
         } else {
             // No collision.
             return NaN;

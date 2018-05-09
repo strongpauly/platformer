@@ -7,6 +7,7 @@ export interface IPlayer extends IPosition {
     inverted: boolean;
     jumping: boolean;
     jumpStart: number;
+    falling: boolean;
 }
 
 export class Player extends React.Component<IPlayer> {
@@ -30,6 +31,8 @@ export class Player extends React.Component<IPlayer> {
             } else {
                 classNames.push("jumping-down");
             }
+        } else if (this.props.falling){
+            classNames.push('jumping-down');
         } else if (this.props.x % Constants.STEP_WIDTH !== 0) {
             animation = Math.floor(this.props.x % Constants.STEP_WIDTH / (Constants.STEP_FRAMES + 1));
             if (this.props.inverted) {
