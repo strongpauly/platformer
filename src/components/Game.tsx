@@ -2,6 +2,8 @@ import * as React from 'react';
 import {connect} from 'react-redux';
 import * as Constants from './Constants';
 import './Game.css';
+
+import { intersects } from '../utils/intersects';
 import {IShape} from './IShape';
 import {Platform} from './Platform';
 import {Player} from './Player';
@@ -16,10 +18,9 @@ class Game extends React.Component<any, any> {
             inverted: false,
             jumpStart: NaN,
             jumping: false,
-            platformY: NaN,
             platforms: [{
                 height: 20,
-                width: 60,
+                width: 120,
                 x: 210,
                 y: 20
             }, {
@@ -65,13 +66,23 @@ class Game extends React.Component<any, any> {
         document.addEventListener('keyup', this.onKeyUp);
     }
 
-    private fall(to:number) {
+    private fall() {
         if (!this.state.falling) {
             this.setState({
                 falling: true
             });
+            const fallIncrement = 5
             const fallInterval = setInterval(() => {
-                let newY = this.state.y - 5;
+                let newY = this.state.y - fallIncrement;
+                let to = this.willCollide({
+                    height: Constants.PLAYER_HEIGHT,
+                    width: Constants.PLAYER_WIDTH,            
+                    x: this.state.x,
+                    y: newY
+                });
+                if(isNaN(to) || to < 0 ){
+                    to = 0;
+                }
                 let falling = true;
                 if (newY <= to) {
                     newY = to;
@@ -87,7 +98,6 @@ class Game extends React.Component<any, any> {
     }
 
     private finishStep() {
-        console.log('finishStep');
         if (this.state.stepping) {
             clearInterval(this.stepInterval);
             this.setState({
@@ -98,29 +108,41 @@ class Game extends React.Component<any, any> {
 
     private jump() {
         if (!this.state.jumping) {
-            const baseY = this.state.y;
+            let landY = this.state.y;
             const time = Date.now();
             this.setState({
                 jumpStart: time,
                 jumping: true
             });
+            const increment = (Constants.JUMP_HEIGHT / Constants.ANIMATION_FREQUENCY);
             const jumpInterval = setInterval(() => {
                 const now = Date.now();
                 const percent = (now - time)/Constants.JUMP_TIME;
-                let newY = baseY;
+                let newY = landY;
                 let jumping = true;
-                if (percent >= 1) { // Jump over
-                    jumping = false;
-                    clearInterval(jumpInterval);
-                } else if (percent <= 0.5) { // On way up.
-                    newY += (Constants.JUMP_HEIGHT * percent * 2)
+                if (percent <= 0.5) { // On way up.
+                    newY = this.state.y + increment;
                 } else { // On way down.
-                    newY += Constants.JUMP_HEIGHT * (1 - percent) * 2
-                }
-                if (!isNaN(this.state.platformY) && newY <= this.state.platformY) { // Jumped onto platform.
-                    newY = this.state.platformY;
-                    jumping = false;
-                    clearInterval(jumpInterval);
+                    newY = this.state.y - increment;
+                    if (newY < landY) { // Jump over
+                        newY = landY;
+                        jumping = false;
+                        clearInterval(jumpInterval);
+                    } else { // Check for collision
+                        const platformY = this.willCollide({
+                            height: Constants.PLAYER_HEIGHT,
+                            width: Constants.PLAYER_WIDTH,            
+                            x: this.state.x,
+                            y: newY
+                        });
+                        if (!isNaN(platformY) && platformY >= 0) {
+                            landY = platformY;
+                            // Prevent falling through floor.
+                            if (newY < landY) {
+                                newY = landY;
+                            }
+                        }
+                    }
                 }
                 this.setState({
                     jumping,
@@ -205,19 +227,20 @@ class Game extends React.Component<any, any> {
                 } else {
                     this.finishStep();
                 }
-                
-                // TODO: Need to distinguish between falling to floor and falling onto another platform.
-                if (!isNaN(newY) && newY === 0) {
-                    this.fall(newY);
-                } else if (newY > 0) { // Jumping onto platform.
-                    this.setState({
-                        platformY: newY
-                    });
+                if (!isNaN(newY) && newY === 0 && !this.state.jumping) {
+                    this.fall();
                 }
             }, Constants.STEP_SPEED);
         }
     }
 
+    /**
+     * Returns a new Y coordinate based on whether the player will collide with a platform.
+     * Takes into account whether player is currently jumping or falling.
+     * @param shape Player
+     * @returns NaN if no collision will occur, -1 if new position collides with a platform, or
+     * the new Y coordinate of the platform that player fell into.
+     */
     private willCollide(shape: IShape): number {
         if(shape.x < 0) {
             return -1;
@@ -226,23 +249,19 @@ class Game extends React.Component<any, any> {
             return (shape.x + shape.width > platform.x && shape.x < platform.x + platform.width);
         });
         if (collided) {
-            // Jumped onto platform
-            if (shape.y >= collided.y + collided.height) {
+            // Jumped/fell onto platform
+            if (shape.y >= collided.y && (this.state.jumping || this.state.falling)) {
                 return collided.y + collided.height;
-            } else {
+            } else if (intersects(shape, collided)) {
                 // Walked into platform.
                 return -1;
             }
-        // Falling off platform    
-        } else if (!isNaN(this.state.platformY)) {
-            this.setState({
-                platformY: NaN
-            });
+        // Check for falling off platform    
+        } else if (shape.y > 0) {
             return 0;
-        } else {
-            // No collision.
-            return NaN;
         }
+        // No collision.
+        return NaN;
     }
 }
 

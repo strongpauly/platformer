@@ -1,4 +1,5 @@
 .platform {
     background-image: url('../assets/brick.png');
     position: absolute;
+    background-size: 27px;
 }
