@@ -1,7 +1,6 @@
 .bullet {
     position: absolute;
-    background: linear-gradient(red, blue, red);
-    border: 1px solid black;
-    width: 5px;
+    background: linear-gradient(rgb(0, 238, 255), rgb(63, 63, 255), rgb(0, 238, 255));
+    width: 15px;
     height: 5px;
 }

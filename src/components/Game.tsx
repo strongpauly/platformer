@@ -156,7 +156,7 @@ class Game extends React.Component<any, any> {
             const bullet = {
                 id: this.state.bulletCount + 1,
                 x: this.state.x + 5,
-                y: this.state.y + 13
+                y: this.state.y + 17
             };
             let bulletIncrement = 10;
             if (this.state.inverted) {
@@ -171,7 +171,7 @@ class Game extends React.Component<any, any> {
                 const newX = bullet.x + bulletIncrement;
                 const collided = this.intersects({
                     height: 5,
-                    width: 5,
+                    width: 15,
                     x: newX,
                     y: bullet.y
                 });
