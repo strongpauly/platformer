@@ -1,6 +1,7 @@
 .player {
     background-image: url('../player.png');
     background-position-x: -6px;
+    background-position-y: 2px;
     position: absolute;
 }
 

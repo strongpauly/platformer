@@ -14,12 +14,14 @@ class Game extends React.Component<any, any> {
             inverted: false,
             jumpStart: NaN,
             jumping: false,
+            platformY: NaN,
             platforms: [{
                 height: 20,
                 width: 60,
-                x: 200,
+                x: 210,
                 y: 20
             }],
+            stepping: false,
             x: 0,
             y: 0
         }
@@ -71,6 +73,11 @@ class Game extends React.Component<any, any> {
                 } else { // On way down.
                     newY += Constants.JUMP_HEIGHT * (1 - percent) * 2
                 }
+                if (!isNaN(this.state.platformY) && newY <= this.state.platformY) { // Jumped onto platform.
+                    newY = this.state.platformY;
+                    jumping = false;
+                    clearInterval(jumpInterval);
+                }
                 this.setState({
                     jumping,
                     y: newY
@@ -121,7 +128,8 @@ class Game extends React.Component<any, any> {
     }
 
     private step(player: IShape) {
-        if(!this.willCollide(player) && !this.state.stepping) {
+        const newY = this.willCollide(player);
+        if((isNaN(newY) || newY > 0) && !this.state.stepping) {
             const time = Date.now();
             const startX = this.state.x;
             this.setState({
@@ -136,7 +144,12 @@ class Game extends React.Component<any, any> {
                     newX = player.x;
                     stepping = false;
                     clearInterval(stepInterval);
-                } 
+                }
+                if (newY > 0) { // Jumping onto platform.
+                    this.setState({
+                        platformY: newY
+                    });
+                }
                 this.setState({
                     stepping,
                     x: newX
@@ -145,11 +158,22 @@ class Game extends React.Component<any, any> {
         }
     }
 
-    private willCollide(shape: IShape): boolean {
-        return this.state.platforms.some((platform:IShape) => {
-            return (shape.x >= platform.x && shape.x <= platform.x + platform.width) ||
-                (shape.y >= platform.y && shape.y <= platform.y + platform.height);
+    private willCollide(shape: IShape): number {
+        const collided = this.state.platforms.find((platform:IShape) => {
+            return (shape.x + shape.width > platform.x && shape.x < platform.x + platform.width);
         });
+        if (collided) {
+            // Jumped onto platform
+            if (shape.y >= collided.y + collided.height) {
+                return collided.y + collided.height;
+            } else {
+                // Walked into platform.
+                return -1;
+            }
+        } else {
+            // No collision.
+            return NaN;
+        }
     }
 }
 
