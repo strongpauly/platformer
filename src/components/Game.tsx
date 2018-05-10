@@ -190,7 +190,7 @@ class Game extends React.Component<any, any> {
     }
 
     private jump() {
-        if (!this.state.jumping) {
+        if (!this.state.jumping && !this.state.falling) {
             let landY = this.state.y;
             const time = Date.now();
             this.setState({
@@ -307,7 +307,8 @@ class Game extends React.Component<any, any> {
                 let stepping = true;
                 const newY = this.willCollide({
                     ...player,
-                    x: newX
+                    x: newX,
+                    y: this.state.y
                 });
                 if(newY === -1) {
                    newX = this.state.x;
