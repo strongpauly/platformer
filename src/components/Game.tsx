@@ -278,15 +278,19 @@ class Game extends React.Component<any, any> {
         switch (event.key) {
             case "ArrowLeft" :
                 this.moveLeft();
+                event.preventDefault();
                 break;
             case "ArrowRight" :
                 this.moveRight();
+                event.preventDefault();
                 break;
             case "ArrowUp" :
                 this.jump();
+                event.preventDefault();
                 break;
             case " " : 
                 this.fireGun();
+                event.preventDefault();
                 break;
             
             default :
@@ -300,6 +304,7 @@ class Game extends React.Component<any, any> {
             case "ArrowLeft" :
             case "ArrowRight" :
                 this.finishStep();
+                event.preventDefault();
                 break;
             default :
                 break;
