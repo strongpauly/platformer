@@ -14,6 +14,7 @@ class Game extends React.Component<any, any> {
 
     private stepInterval: any;
     private fallInterval: any;
+    private gameElement: React.RefObject<HTMLDivElement>;
 
     constructor(props: React.Props<any>) {
         super(props);
@@ -22,28 +23,36 @@ class Game extends React.Component<any, any> {
             bullets: [],
             guns: [{
                 x: 380,
-                y: 70
+                y: 110
             }],
             hasGun: false,
             inverted: false,
             jumpStart: NaN,
             jumping: false,
+            levelOffset: 0,
+            levelWidth: 10000,
             platforms: [{
                 height: 20,
                 width: 120,
-                x: 210,
+                x: 90,
                 y: 15
             }, {
                 height: 20,
                 width: 90,
-                x: 360,
+                x: 250,
                 y: 40
+            }, {
+                height: 20,
+                width: 90,
+                x: 360,
+                y: 80
             }],
             stepStart: NaN,
             stepping: false,
             x: 0,
             y: 0
         }
+        this.gameElement = React.createRef();
     }
 
     public render() {
@@ -57,7 +66,11 @@ class Game extends React.Component<any, any> {
             <Bullet key={bullet.id} x={bullet.x} y={bullet.y}/>
         );
         return (
-        <div className="game">
+        <div className="game" ref={this.gameElement}>
+            <div className="scrollContainer" style={{
+                left: this.state.levelOffset,
+                width: this.state.levelWidth
+            }}>
             <Player 
                 x={this.state.x} 
                 y={this.state.y} 
@@ -71,6 +84,7 @@ class Game extends React.Component<any, any> {
             {platforms}
             {guns}
             {bullets}
+            </div>
         </div>
         );
     }
@@ -310,11 +324,20 @@ class Game extends React.Component<any, any> {
                     x: newX,
                     y: this.state.y
                 });
+                let levelOffset = this.state.levelOffset;
                 if(newY === -1) {
                    newX = this.state.x;
                    stepping = false;
+                } else if (this.gameElement.current){
+                    const viewWidth = this.gameElement.current.offsetWidth;
+                    if (newX + levelOffset <= 200 && levelOffset < 0) {
+                        levelOffset -= increment;
+                    } else if (newX >= viewWidth - 200 && increment > 0) {
+                        levelOffset -= increment;
+                    }
                 }
                 this.setState({
+                    levelOffset,
                     stepping,
                     x: newX
                 });
