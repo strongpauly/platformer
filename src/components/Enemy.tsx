@@ -20,6 +20,7 @@ export class Enemy extends React.Component<any, any> {
         if (this.props.inverted) {
             classes.push('inverted');
         }
+        classes.push('enemy-move-' + this.props.x % 3);
         if (this.props.hit) {
             classes.push('hit');
         }

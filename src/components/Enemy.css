@@ -1,9 +1,20 @@
 .enemy {
     position:absolute; 
     background-image: url('../assets/alien.png');
-    background-position-x: 133px;
-    background-position-y: -1px;
+    background-position-y: -38px;
     background-size: 140px 150px;
+}
+
+.enemy-move-0 {
+    background-position-x: 133px;
+}
+
+.enemy-move-1 {
+    background-position-x: 94px;
+}
+
+.enemy-move-2 {
+    background-position-x: 59px;
 }
 
 .hit {
