@@ -1,8 +1,11 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
+import level from '../levels/1';
+import gameStart from '../state/actions/gameStart';
 import { intersects } from '../utils/intersects';
 import { Bullet } from './Bullet';
 import * as Constants from './Constants';
+import { Enemy } from './Enemy';
 import './Game.css';
 import { Gun } from './Gun';
 import { IPosition } from './IPosition';
@@ -21,32 +24,19 @@ class Game extends React.Component<any, any> {
         this.state = {
             bulletCount: 0,
             bullets: [],
-            guns: [{
-                x: 380,
-                y: 110
-            }],
+            enemies: level.enemies.map( (enemy: any) => {
+                enemy.width = Constants.ENEMY_WIDTH;
+                enemy.height = Constants.ENEMY_HEIGHT;
+                return enemy;
+            }),
+            guns: level.guns,
             hasGun: false,
             inverted: false,
             jumpStart: NaN,
             jumping: false,
             levelOffset: 0,
             levelWidth: 10000,
-            platforms: [{
-                height: 20,
-                width: 120,
-                x: 90,
-                y: 15
-            }, {
-                height: 20,
-                width: 90,
-                x: 250,
-                y: 40
-            }, {
-                height: 20,
-                width: 90,
-                x: 360,
-                y: 80
-            }],
+            platforms: level.platforms,
             stepStart: NaN,
             stepping: false,
             x: 0,
@@ -58,6 +48,9 @@ class Game extends React.Component<any, any> {
     public render() {
         const platforms = this.state.platforms.map( (platform:IShape, i:number) => 
             <Platform key={i} x={platform.x} y={platform.y} height={platform.height} width={platform.width}/>
+        );
+        const enemies = this.state.enemies.map( (enemy:any, i:number) => 
+            <Enemy key={i} x={enemy.x} y={enemy.y} minX={enemy.minX} maxX={enemy.maxX} speed={enemy.speed} inverted={enemy.inverted} hit={enemy.hit}/>
         );
         const guns = this.state.guns.map( (gun:IPosition, i:number) => 
             <Gun key={i} x={gun.x} y={gun.y}/>
@@ -84,6 +77,7 @@ class Game extends React.Component<any, any> {
             {platforms}
             {guns}
             {bullets}
+            {enemies}
             </div>
         </div>
         );
@@ -92,11 +86,20 @@ class Game extends React.Component<any, any> {
     public componentDidMount() {
         document.addEventListener('keydown', this.onKeyDown);
         document.addEventListener('keyup', this.onKeyUp);
+        this.props.dispatch(gameStart());
+        this.state.enemies.forEach((enemy:any) => {
+            enemy.movementInterval = setInterval(() => {
+                this.moveEnemy(enemy);
+            }, 50);
+        });
     }
     
     public componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown);
         document.addEventListener('keyup', this.onKeyUp);
+        this.state.enemies.forEach( (enemy:any) => {
+            clearInterval(enemy.movementInterval);
+        });
     }
 
     private checkPowerUps() {
@@ -166,7 +169,7 @@ class Game extends React.Component<any, any> {
     }
 
     private fireGun() {
-        if (this.state.hasGun) {
+        if (this.state.hasGun && this.state.bullets.length <= 7) {
             const bullet = {
                 id: this.state.bulletCount + 1,
                 x: this.state.x + 5,
@@ -249,6 +252,18 @@ class Game extends React.Component<any, any> {
             }, Constants.ANIMATION_FREQUENCY);
         }
    }
+
+   private moveEnemy = (enemy: any) => {
+        enemy.x += (enemy.inverted ? -enemy.speed : enemy.speed);
+        if (enemy.x <= enemy.minX) {
+            enemy.inverted = false;
+        } else if(enemy.x >= enemy.maxX) {
+            enemy.inverted = true;
+        }
+        this.setState({
+            enemies: [enemy]
+        });
+    }
 
    private moveLeft() {
        this.setState({
@@ -355,10 +370,35 @@ class Game extends React.Component<any, any> {
     }
 
     private intersects(shape: IShape): IShape | undefined {
-        const collided = this.state.platforms.find((platform:IShape) => {
+        let collided = this.state.platforms.find((platform:IShape) => {
             return intersects(shape, platform);
         });
         if (collided) {
+            return collided;
+        }
+        collided = this.state.enemies.find((platform:IShape) => {
+            return intersects(shape, platform);
+        });
+        if (collided) {
+            collided.hp--;
+            collided.hit = true;
+            if (collided.hp > 0) {
+                this.setState({
+                    enemies: [collided]
+                });
+                collided.hitTimer = setTimeout( () => {
+                    collided.hit = false;
+                    delete collided.hitTimer;
+                    this.setState({
+                        enemies: [collided]
+                    });
+                }, 299);
+            } else {
+                clearInterval(collided.movementInterval);
+                this.setState({
+                    enemies: []
+                });
+            }
             return collided;
         }
         return;

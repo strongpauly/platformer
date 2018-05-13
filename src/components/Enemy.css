@@ -1,0 +1,25 @@
+.enemy {
+    position:absolute; 
+    background-image: url('../assets/alien.png');
+    background-position-x: 133px;
+    background-position-y: -1px;
+    background-size: 140px 150px;
+}
+
+.hit {
+    -webkit-animation-name: hit-animation;
+    -webkit-animation-duration: 0.3s;
+
+    animation-name: hit-animation;
+    animation-duration: 0.3s;
+}
+
+@-webkit-keyframes hit-animation {  
+    from { filter: invert(100%); }
+    to   { filter: default; }
+}
+
+@keyframes hit-animation {  
+    from { filter: invert(100%); }
+    to   { filter: default; }
+}

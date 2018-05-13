@@ -9,3 +9,5 @@ export const PLAYER_HEIGHT = 39;
 export const GUN_WIDTH = 15;
 export const GUN_HEIGHT = 15;
 export const ANIMATION_FREQUENCY = 15;
+export const ENEMY_WIDTH = 20;
+export const ENEMY_HEIGHT = 30;
