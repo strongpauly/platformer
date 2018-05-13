@@ -264,14 +264,16 @@ class Game extends React.Component<any, any> {
         this.updateEnemy(enemy);
     }
 
-    private updateEnemy(enemy: any): void {
-        this.setState({
-            enemies: this.state.enemies.map( (e:any) => {
-                if(e.id === enemy.id) {
-                    return enemy;
-                }
-                return e;
-            })
+    private updateEnemy(enemy: any): Promise<void> {
+        return new Promise((resolve, reject) => {
+            this.setState({
+                enemies: this.state.enemies.map( (e:any) => {
+                    if(e.id === enemy.id) {
+                        return enemy;
+                    }
+                    return e;
+                })
+            }, resolve);
         });
     }
 
@@ -391,14 +393,16 @@ class Game extends React.Component<any, any> {
         });
         if (collided) {
             collided.hp--;
-            collided.hit = true;
             if (collided.hp > 0) {
-                this.updateEnemy(collided);
-                collided.hitTimer = setTimeout( () => {
+                if (collided.hit) {
+                    // Hit a second time.
                     collided.hit = false;
-                    delete collided.hitTimer;
-                    this.updateEnemy(collided);
-                }, 299);
+                    this.updateEnemy(collided).then( () => {
+                        this.hitEnemy(collided);
+                    });
+                } else {
+                    this.hitEnemy(collided)
+                }
             } else {
                 clearInterval(collided.movementInterval);
                 this.setState({
@@ -408,6 +412,16 @@ class Game extends React.Component<any, any> {
             return collided;
         }
         return;
+    }
+
+    private hitEnemy(enemy:any){
+        enemy.hit = true;
+        this.updateEnemy(enemy);
+        enemy.hitTimer = setTimeout( () => {
+            enemy.hit = false;
+            delete enemy.hitTimer;
+            this.updateEnemy(enemy);
+        }, 299);
     }
 
     /**
