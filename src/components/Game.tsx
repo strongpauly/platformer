@@ -24,7 +24,8 @@ class Game extends React.Component<any, any> {
         this.state = {
             bulletCount: 0,
             bullets: [],
-            enemies: level.enemies.map( (enemy: any) => {
+            enemies: level.enemies.map( (enemy: any, index:number) => {
+                enemy.id = index;
                 enemy.width = Constants.ENEMY_WIDTH;
                 enemy.height = Constants.ENEMY_HEIGHT;
                 return enemy;
@@ -260,8 +261,17 @@ class Game extends React.Component<any, any> {
         } else if(enemy.x >= enemy.maxX) {
             enemy.inverted = true;
         }
+        this.updateEnemy(enemy);
+    }
+
+    private updateEnemy(enemy: any): void {
         this.setState({
-            enemies: [enemy]
+            enemies: this.state.enemies.map( (e:any) => {
+                if(e.id === enemy.id) {
+                    return enemy;
+                }
+                return e;
+            })
         });
     }
 
@@ -383,20 +393,16 @@ class Game extends React.Component<any, any> {
             collided.hp--;
             collided.hit = true;
             if (collided.hp > 0) {
-                this.setState({
-                    enemies: [collided]
-                });
+                this.updateEnemy(collided);
                 collided.hitTimer = setTimeout( () => {
                     collided.hit = false;
                     delete collided.hitTimer;
-                    this.setState({
-                        enemies: [collided]
-                    });
+                    this.updateEnemy(collided);
                 }, 299);
             } else {
                 clearInterval(collided.movementInterval);
                 this.setState({
-                    enemies: []
+                    enemies: this.state.enemies.filter( (e:any) => e.id !== collided.id)
                 });
             }
             return collided;
