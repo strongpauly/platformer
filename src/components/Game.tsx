@@ -13,6 +13,18 @@ import {IShape} from './IShape';
 import {Platform} from './Platform';
 import {Player} from './Player';
 
+interface IPlayer {
+    falling: boolean;
+    hasGun: boolean;
+    inverted: boolean;
+    jumpStart: number;
+    jumping: boolean;
+    stepStart: number;
+    stepping: boolean;
+    x: number;
+    y: number;
+}
+
 class Game extends React.Component<any, any> {
 
     private stepInterval: any;
@@ -31,17 +43,19 @@ class Game extends React.Component<any, any> {
                 return enemy;
             }),
             guns: level.guns,
-            hasGun: false,
-            inverted: false,
-            jumpStart: NaN,
-            jumping: false,
             levelOffset: 0,
             levelWidth: 10000,
             platforms: level.platforms,
-            stepStart: NaN,
-            stepping: false,
-            x: 0,
-            y: 0
+            player: {
+                hasGun: false,
+                inverted: false,
+                jumpStart: NaN,
+                jumping: false,
+                stepStart: NaN,
+                stepping: false,
+                x: 0,
+                y: 0
+            },
         }
         this.gameElement = React.createRef();
     }
@@ -66,15 +80,15 @@ class Game extends React.Component<any, any> {
                 width: this.state.levelWidth
             }}>
             <Player 
-                x={this.state.x} 
-                y={this.state.y} 
-                inverted={this.state.inverted}
-                jumping={this.state.jumping}
-                jumpStart={this.state.jumpStart}
-                stepping={this.state.stepping}
-                stepStart={this.state.stepStart}
-                falling={this.state.falling}
-                hasGun={this.state.hasGun}/>
+                x={this.state.player.x} 
+                y={this.state.player.y} 
+                inverted={this.state.player.inverted}
+                jumping={this.state.player.jumping}
+                jumpStart={this.state.player.jumpStart}
+                stepping={this.state.player.stepping}
+                stepStart={this.state.player.stepStart}
+                falling={this.state.player.falling}
+                hasGun={this.state.player.hasGun}/>
             {platforms}
             {guns}
             {bullets}
@@ -104,15 +118,15 @@ class Game extends React.Component<any, any> {
     }
 
     private checkPowerUps() {
-        const player: IShape = {
+        const coords: IShape = {
             height: Constants.PLAYER_HEIGHT,
             width: Constants.PLAYER_WIDTH,            
-            x: this.state.x,
-            y: this.state.y
+            x: this.state.player.x,
+            y: this.state.player.y
         }
-        if (!this.state.hasGun && this.state.guns) {
+        if (!this.state.player.hasGun && this.state.guns) {
             const powerUp = this.state.guns.find( (gun: IPosition) => 
-                intersects(player, {
+                intersects(coords, {
                     ...gun,
                     height: Constants.GUN_HEIGHT,
                     width: Constants.GUN_WIDTH
@@ -121,24 +135,30 @@ class Game extends React.Component<any, any> {
             if (powerUp) {
                 this.setState({
                     guns: this.state.guns.filter( (gun: IPosition) => gun.x !== powerUp.x && gun.y !== powerUp.y),
-                    hasGun: true
+                    player: {
+                        ...this.state.player,
+                        hasGun: true
+                    }
                 });
             }
         }
     }
 
     private fall() {
-        if (!this.state.falling) {
+        let player: IPlayer = this.state.player;
+        if (!player.falling) {
+            player.falling = true;
             this.setState({
-                falling: true
+                player
             });
             const fallIncrement = 5
             this.fallInterval = setInterval(() => {
-                let newY = this.state.y - fallIncrement;
+                player = this.state.player;
+                let newY = player.y - fallIncrement;
                 let to = this.willCollide({
                     height: Constants.PLAYER_HEIGHT,
                     width: Constants.PLAYER_WIDTH,            
-                    x: this.state.x,
+                    x: player.x,
                     y: newY
                 });
                 if(isNaN(to) || to < 0 ){
@@ -150,9 +170,10 @@ class Game extends React.Component<any, any> {
                     falling = false;
                     clearInterval(this.fallInterval);
                 }
+                player.falling = falling;
+                player.y = newY;
                 this.setState({
-                    falling,
-                    y: newY
+                    player
                 });
                 this.checkPowerUps();
             }, Constants.ANIMATION_FREQUENCY);
@@ -164,20 +185,24 @@ class Game extends React.Component<any, any> {
             clearInterval(this.stepInterval);
             this.stepInterval = NaN;
             this.setState({
-                stepping: false
+                player: {
+                    ...this.state.player,
+                    stepping: false
+                }
             });
         }
     }
 
     private fireGun() {
-        if (this.state.hasGun && this.state.bullets.length <= 7) {
+        const player: IPlayer = this.state.player;
+        if (player.hasGun && this.state.bullets.length <= 7) {
             const bullet = {
                 id: this.state.bulletCount + 1,
-                x: this.state.x + 5,
-                y: this.state.y + 17
+                x: player.x + 5,
+                y: player.y + 17
             };
             let bulletIncrement = 10;
-            if (this.state.inverted) {
+            if (player.inverted) {
                 bulletIncrement = -bulletIncrement;
             }
             this.setState({
@@ -193,7 +218,7 @@ class Game extends React.Component<any, any> {
                     x: newX,
                     y: bullet.y
                 });
-                if (collided || newX < 0 || newX > this.state.x + 1000) {
+                if (collided || newX < 0 || newX > player.x + 1000) {
                     clearInterval(bulletInterval);
                     newBullets = newBullets.filter((b:any) => b.id !== bullet.id);
                 } else {
@@ -208,23 +233,26 @@ class Game extends React.Component<any, any> {
     }
 
     private jump() {
-        if (!this.state.jumping && !this.state.falling) {
-            let landY = this.state.y;
+        let player:IPlayer = this.state.player;
+        if (!player.jumping && !player.falling) {
+            let landY = player.y;
             const time = Date.now();
+            player.jumping = true;
+            player.jumpStart = time;
             this.setState({
-                jumpStart: time,
-                jumping: true
+                player
             });
             const increment = (Constants.JUMP_HEIGHT / Constants.ANIMATION_FREQUENCY);
             const jumpInterval = setInterval(() => {
+                player = this.state.player;
                 const now = Date.now();
                 const percent = (now - time)/Constants.JUMP_TIME;
                 let newY = landY;
                 let jumping = true;
                 if (percent <= 0.5) { // On way up.
-                    newY = this.state.y + increment;
+                    newY = player.y + increment;
                 } else { // On way down.
-                    newY = this.state.y - increment;
+                    newY = player.y - increment;
                     if (newY < landY) { // Jump over
                         newY = landY;
                         jumping = false;
@@ -233,7 +261,7 @@ class Game extends React.Component<any, any> {
                         const platformY = this.willCollide({
                             height: Constants.PLAYER_HEIGHT,
                             width: Constants.PLAYER_WIDTH,            
-                            x: this.state.x,
+                            x: player.x,
                             y: newY
                         });
                         if (!isNaN(platformY) && platformY >= 0) {
@@ -245,9 +273,10 @@ class Game extends React.Component<any, any> {
                         }
                     }
                 }
+                player.jumping = jumping;
+                player.y = newY;
                 this.setState({
-                    jumping,
-                    y: newY
+                    player
                 });
                 this.checkPowerUps();
             }, Constants.ANIMATION_FREQUENCY);
@@ -278,26 +307,30 @@ class Game extends React.Component<any, any> {
     }
 
    private moveLeft() {
+       const player:IPlayer = this.state.player;
+       player.inverted = true;
        this.setState({
-           inverted: true
+            player
        });
        this.step({
             height: Constants.PLAYER_HEIGHT,
             width: Constants.PLAYER_WIDTH,            
-            x: this.state.x <= Constants.STEP_WIDTH ? 0 : this.state.x - Constants.STEP_WIDTH,
-            y: this.state.y
+            x: player.x <= Constants.STEP_WIDTH ? 0 : player.x - Constants.STEP_WIDTH,
+            y: player.y
        });
    }
 
     private moveRight() {
+        const player:IPlayer = this.state.player;
+        player.inverted = false;
         this.setState({
-            inverted: false
+            player
         });
         this.step({
             height: Constants.PLAYER_HEIGHT,
             width: Constants.PLAYER_WIDTH,
-            x: this.state.x + Constants.STEP_WIDTH,
-            y: this.state.y,
+            x: player.x + Constants.STEP_WIDTH,
+            y: player.y,
        });
     }
 
@@ -339,26 +372,29 @@ class Game extends React.Component<any, any> {
         return;
     }
 
-    private step(player: IShape) {
+    private step(coords: IShape) {
         if (isNaN(this.stepInterval)) {
+            let player: IPlayer = this.state.player;
             const time = Date.now();
+            player.stepStart = time;
+            player.stepping = true;
             this.setState({
-                stepStart: time,
-                stepping: true
+                player
             });
-            let newX = player.x;
-            const increment = player.x - this.state.x;
+            let newX = coords.x;
+            const increment = coords.x - player.x;
             this.stepInterval = setInterval(() => {
+                player = this.state.player;
                 newX += increment;
                 let stepping = true;
                 const newY = this.willCollide({
-                    ...player,
+                    ...coords,
                     x: newX,
-                    y: this.state.y
+                    y: player.y
                 });
                 let levelOffset = this.state.levelOffset;
                 if(newY === -1) {
-                   newX = this.state.x;
+                   newX = player.x;
                    stepping = false;
                 } else if (this.gameElement.current){
                     const viewWidth = this.gameElement.current.offsetWidth;
@@ -370,11 +406,14 @@ class Game extends React.Component<any, any> {
                 }
                 this.setState({
                     levelOffset,
-                    stepping,
-                    x: newX
+                    player: {
+                        ...player,
+                        stepping,
+                        x: newX
+                    }
                 });
                 this.checkPowerUps();
-                if (!isNaN(newY) && newY !== this.state.y && !this.state.jumping && stepping) {
+                if (!isNaN(newY) && newY !== player.y && !player.jumping && stepping) {
                     this.fall();
                 }
             }, Constants.STEP_SPEED);
@@ -440,7 +479,7 @@ class Game extends React.Component<any, any> {
         });
         if (collided) {
             // Jumped/fell onto platform
-            if (shape.y >= collided.y && (this.state.jumping || this.state.falling)) {
+            if (shape.y >= collided.y && (this.state.player.jumping || this.state.player.falling)) {
                 return collided.y + collided.height;
             } else if (intersects(shape, collided)) {
                 // Walked into platform.
