@@ -4,7 +4,9 @@ import { IPosition } from './IPosition';
 import './Player.css';
 
 export interface IPlayer extends IPosition {
+    hp: number;
     inverted: boolean;
+    invulnerable: boolean;
     jumping: boolean;
     jumpStart: number;
     falling: boolean;
@@ -44,6 +46,9 @@ export class Player extends React.Component<IPlayer> {
         }
         if (this.props.inverted) {
             classNames.push("inverted");
+        }
+        if(this.props.invulnerable) {
+            classNames.push("invulnerable")
         }
         return (
         <div className={classNames.join(" ")} style={style}/>

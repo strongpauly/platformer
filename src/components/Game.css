@@ -18,3 +18,41 @@
     filter: FlipH;
     -ms-filter: "FlipH";
 }
+
+.hit {
+    -webkit-animation-name: hit-animation;
+    -webkit-animation-duration: 0.3s;
+
+    animation-name: hit-animation;
+    animation-duration: 0.3s;
+}
+
+@-webkit-keyframes hit-animation {  
+    from { filter: invert(100%); }
+    to   { filter: default; }
+}
+
+@keyframes hit-animation {  
+    from { filter: invert(100%); }
+    to   { filter: default; }
+}
+
+.invulnerable {
+    -webkit-animation-name: invulnerable-animation;
+    -webkit-animation-duration: 0.3s;
+    -webkit-animation-iteration-count: infinite;
+
+    animation-name: invulnerable-animation;
+    animation-duration: 0.3s;
+    animation-iteration-count: infinite;
+}
+
+@-webkit-keyframes invulnerable-animation {  
+    from { filter: opacity(0.1); }
+    to   { filter: default; }
+}
+
+@keyframes invulnerable-animation {  
+    from { filter: opacity(0.1); }
+    to   { filter: default; }
+}

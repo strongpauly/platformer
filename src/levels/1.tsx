@@ -1,13 +1,13 @@
 export default {
     "enemies": [{
-        "hp": 20,
+        "hp": 10,
         "maxX": 600,
         "minX": 500,
         "speed": 2,
         "x": 560,
         "y": 0
     }, {
-        "hp": 20,
+        "hp": 10,
         "maxX": 750,
         "minX": 650,
         "speed": 2,

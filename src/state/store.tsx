@@ -5,9 +5,7 @@ import reducers from './reducers/';
 const middlewares = [];
 /* istanbul ignore if */
 if (process.env.NODE_ENV === 'development') {
-  const logger = createLogger({
-    // ...options
-  });
+  const logger = createLogger({});
   middlewares.push(logger);
 }
 

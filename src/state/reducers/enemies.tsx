@@ -11,4 +11,4 @@ export function enemiesReducer(enemies:any=null, action:any) {
             break;    
     }
     return enemies;
-  }
+}
