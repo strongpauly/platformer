@@ -1,6 +1,7 @@
-export default function stepStart() {
+export default function stepStart(inverted: boolean) {
     return {
-      type: 'STEP_START'
+        payload: inverted,
+        type: 'STEP_START'
     };
   }
   

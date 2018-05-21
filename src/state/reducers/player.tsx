@@ -35,9 +35,44 @@ export function playerReducer(player:IPlayer=playerDefault, action: IAction) {
                 falling: true
             };
             break;
+        case 'FALL_MOVE': 
+            player = {
+                ...player,
+                falling: action.payload.falling,
+                y: action.payload.y
+            };
+            break;
+        case 'JUMP_START':
+            player = {
+                ...player,
+                jumpStart: Date.now(),
+                jumping: true,
+            };
+            break;
+        case 'JUMP_MOVE':
+            player = {
+                ...player,
+                jumping: action.payload.jumping,
+                y: action.payload.y
+            };
+            break;
+        case 'PLAYER_HIT':
+            player = {
+                ...player,
+                hp: player.hp - 1,
+                invulnerable: true
+            }
+            break;
+        case 'PLAYER_VULNERABLE' :
+            player = {
+                ...player,
+                invulnerable: false
+            }
+            break;
         case 'STEP_START':
             player = {
                 ...player,
+                inverted: action.payload,
                 stepStart: Date.now(),
                 stepping: true,
             };
