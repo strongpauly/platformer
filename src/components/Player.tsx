@@ -1,19 +1,7 @@
 import * as React from 'react';
+import { IPlayer } from '../model/IPlayer';
 import * as Constants from './Constants';
-import { IPosition } from './IPosition';
 import './Player.css';
-
-export interface IPlayer extends IPosition {
-    hp: number;
-    inverted: boolean;
-    invulnerable: boolean;
-    jumping: boolean;
-    jumpStart: number;
-    falling: boolean;
-    stepping: boolean;
-    stepStart: number;
-    hasGun: boolean;
-}
 
 export class Player extends React.Component<IPlayer> {
 
