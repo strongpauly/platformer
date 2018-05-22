@@ -341,9 +341,12 @@ class Game extends React.Component<any, any> {
                     stepping = false;
                 } else if (this.gameElement.current){
                     const viewWidth = this.gameElement.current.offsetWidth;
-                    if (newX + levelOffset <= 200 && levelOffset < 0) {
+                    const bufferSize = 200;
+                    if (newX + levelOffset <= bufferSize && levelOffset < 0) {
+                        /* Scroll left */
                         levelOffset -= increment;
-                    } else if (newX >= viewWidth - 200 && increment > 0) {
+                    } else if (newX >= viewWidth - bufferSize && increment > 0 && levelOffset + this.state.levelWidth > viewWidth) {
+                        /* Scroll right */
                         levelOffset -= increment;
                     }
                 }
@@ -414,13 +417,6 @@ class Game extends React.Component<any, any> {
         }, 299);
     }
 
-    /**
-     * Returns a new Y coordinate based on whether the player will collide with a platform.
-     * Takes into account whether player is currently jumping or falling.
-     * @param shape Player
-     * @returns NaN if no collision will occur, -1 if new position collides with a platform, or
-     * the new Y coordinate of the platform that player fell into.
-     */
     private willCollide(shape: IShape): ICollision {
         const collision: ICollision = {
             isEnemy: false,
@@ -428,7 +424,8 @@ class Game extends React.Component<any, any> {
             shape: null,
         }
 
-        if(shape.x < 0) {
+        if(shape.x < 0 || shape.x + shape.width >= this.state.levelWidth) {
+            collision.newY = -1;
             return collision;
         }
         let collided = this.state.platforms.find((platform:IShape) => {

@@ -34,5 +34,5 @@ export default {
         "x": 360,
         "y": 80
     }],
-    "width": 10000
+    "width": 1500
 }
