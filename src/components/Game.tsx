@@ -46,7 +46,6 @@ class Game extends React.Component<any, any> {
                 enemy.height = Constants.ENEMY_HEIGHT;
                 return enemy;
             }),
-            gameOver: false,
             guns: level.guns,
             levelOffset: 0,
             levelWidth: 10000,
@@ -68,21 +67,20 @@ class Game extends React.Component<any, any> {
         const bullets = this.state.bullets.map( (bullet:any, i:number) => 
             <Bullet key={bullet.id} x={bullet.x} y={bullet.y}/>
         );
+        const gameOver = this.props.player.hp <= 0;
         return (
         <div className="game" ref={this.gameElement}>
             <div className="scrollContainer" style={{
                 left: this.state.levelOffset,
                 width: this.state.levelWidth
             }}>
-            <Player {...this.props.player}/>
+            {!gameOver? <Player {...this.props.player}/> : <></>}
             {platforms}
             {guns}
             {bullets}
             {enemies}
             </div>
-            <div>
-                <span>HP: </span><span>{this.props.player.hp}</span>
-            </div>
+            {gameOver?  <div className="gameOver">GAME OVER</div> : <></>}
         </div>
         );
     }
@@ -366,9 +364,11 @@ class Game extends React.Component<any, any> {
             return;
         }
         this.props.dispatch(playerHit());
-        setTimeout(() => {
-            this.props.dispatch(playerVulnerable());
-        }, 3000);
+        if(this.props.player.hp > 0) {
+            setTimeout(() => {
+                this.props.dispatch(playerVulnerable());
+            }, 3000);
+        }
     }
 
     private bulletIntersects(shape: IShape): IShape | undefined {
