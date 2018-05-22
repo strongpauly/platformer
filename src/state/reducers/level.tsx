@@ -7,11 +7,13 @@ export function levelReducer(level:any=null, action:any) {
         level = levels['1'];
     }
     switch (action.type) {
+        case 'LEVEL_CHANGE':
+            level = levels[action.payload];
         case 'START' :
             level = {
                 ...level,
                 enemies: level.enemies.map( (enemy: any, index:number) => {
-                    enemy.id = index;
+                    enemy.id = level.name + '_' + index;
                     enemy.width = Constants.ENEMY_WIDTH;
                     enemy.height = Constants.ENEMY_HEIGHT;
                     return enemy;
@@ -41,8 +43,7 @@ export function levelReducer(level:any=null, action:any) {
                 enemies: level.enemies.filter( (e:any) => e.id !== action.payload.id)
             }
             break;
-        case 'LEVEL_CHANGE':
-            level = levels[action.payload];
+        
         default :
             break;    
     }

@@ -30,5 +30,13 @@
     "enzyme": "^3.3.0",
     "enzyme-adapter-react-16": "^1.1.1",
     "typescript": "^2.8.3"
+  },
+  "jest": {
+    "collectCoverageFrom": [
+      "**/*.{ts,tsx}",
+      "!**/images.d.ts",
+      "!**/src/index.tsx",
+      "!**/src/registerServiceWorker.ts"
+    ]
   }
 }

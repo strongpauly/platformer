@@ -7,10 +7,11 @@ ShallowWrapper {
   Symbol(enzyme.__unrendered__): <Provider
     store={
       Object {
-        "dispatch": [MockFunction],
-        "getState": [MockFunction],
-        "replaceReducer": [MockFunction],
-        "subscribe": [MockFunction],
+        "dispatch": [Function],
+        "getState": [Function],
+        "replaceReducer": [Function],
+        "subscribe": [Function],
+        Symbol(observable): [Function],
       }
     }
   >

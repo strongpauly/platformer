@@ -18,6 +18,7 @@ export default {
         "x": 380,
         "y": 107
     }],
+    "name": "1",
     "platforms": [{
         "height": 20,
         "width": 120,

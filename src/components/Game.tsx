@@ -51,8 +51,8 @@ class Game extends React.Component<any, any> {
         const platforms = level.platforms.map( (platform:IShape, i:number) => 
             <Platform key={i} x={platform.x} y={platform.y} height={platform.height} width={platform.width}/>
         );
-        const enemies = level.enemies.map( (enemy:any) => 
-            <Enemy key={enemy.id} {...enemy}/>
+        const enemies = level.enemies.map( (enemy:any, i:number) => 
+            <Enemy key={i} {...enemy}/>
         );
         const guns = level.guns.map( (gun:IPosition, i:number) => 
             <Gun key={i} x={gun.x} y={gun.y}/>
@@ -91,7 +91,7 @@ class Game extends React.Component<any, any> {
     
     public componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown);
-        document.addEventListener('keyup', this.onKeyUp);
+        document.removeEventListener('keyup', this.onKeyUp);
         this.props.level.enemies.forEach( (enemy:any) => {
             clearInterval(enemy.movementInterval);
         });
@@ -182,7 +182,6 @@ class Game extends React.Component<any, any> {
                     bullets: newBullets
                 });
             }, Constants.ANIMATION_FREQUENCY)
-            
         }
     }
 
@@ -298,8 +297,8 @@ class Game extends React.Component<any, any> {
         if (isNaN(this.stepInterval)) {
             let player: IPlayer = this.props.player;
             this.props.dispatch(stepStart(inverted));
-            let newX = coords.x;
             const increment = coords.x - player.x;
+            let newX = coords.x - increment;
             this.stepInterval = setInterval(() => {
                 player = this.props.player;
                 newX += increment;

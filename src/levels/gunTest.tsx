@@ -4,7 +4,7 @@ export default {
         "x": 18,
         "y": 0
     }],
-    "name": "2",
+    "name": "gunTest",
     "platforms": [],
     "width": 30
 }
