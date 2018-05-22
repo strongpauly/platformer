@@ -48,7 +48,7 @@ class Game extends React.Component<any, any> {
             }),
             guns: level.guns,
             levelOffset: 0,
-            levelWidth: 10000,
+            levelWidth: level.width,
             platforms: level.platforms,
         }
         this.gameElement = React.createRef();

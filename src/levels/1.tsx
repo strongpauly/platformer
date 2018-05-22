@@ -33,5 +33,6 @@ export default {
         "width": 90,
         "x": 360,
         "y": 80
-    }]
+    }],
+    "width": 10000
 }
