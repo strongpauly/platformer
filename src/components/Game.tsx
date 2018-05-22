@@ -1,6 +1,5 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
-import level from '../levels/1';
 import { IPlayer } from '../model/IPlayer';
 import collectGun from '../state/actions/collectGun';
 import fallMove from '../state/actions/fallMove';
@@ -8,11 +7,13 @@ import fallStart from '../state/actions/fallStart';
 import gameStart from '../state/actions/gameStart';
 import jumpMove from '../state/actions/jumpMove';
 import jumpStart from '../state/actions/jumpStart';
+import killEnemy from '../state/actions/killEnemy';
 import playerHit from '../state/actions/playerHit';
 import playerVulnerable from '../state/actions/playerVulnerable';
 import stepMove from '../state/actions/stepMove';
 import stepStart from '../state/actions/stepStart';
 import stepStop from '../state/actions/stepStop';
+import updateEnemy from '../state/actions/updateEnemy';
 import { intersects } from '../utils/intersects';
 import { Bullet } from './Bullet';
 import * as Constants from './Constants';
@@ -40,28 +41,20 @@ class Game extends React.Component<any, any> {
         this.state = {
             bulletCount: 0,
             bullets: [],
-            enemies: level.enemies.map( (enemy: any, index:number) => {
-                enemy.id = index;
-                enemy.width = Constants.ENEMY_WIDTH;
-                enemy.height = Constants.ENEMY_HEIGHT;
-                return enemy;
-            }),
-            guns: level.guns,
-            levelOffset: 0,
-            levelWidth: level.width,
-            platforms: level.platforms,
+            levelOffset: 0
         }
         this.gameElement = React.createRef();
     }
 
     public render() {
-        const platforms = this.state.platforms.map( (platform:IShape, i:number) => 
+        const level = this.props.level;
+        const platforms = level.platforms.map( (platform:IShape, i:number) => 
             <Platform key={i} x={platform.x} y={platform.y} height={platform.height} width={platform.width}/>
         );
-        const enemies = this.state.enemies.map( (enemy:any, i:number) => 
-            <Enemy key={i} x={enemy.x} y={enemy.y} minX={enemy.minX} maxX={enemy.maxX} speed={enemy.speed} inverted={enemy.inverted} hit={enemy.hit}/>
+        const enemies = level.enemies.map( (enemy:any) => 
+            <Enemy key={enemy.id} {...enemy}/>
         );
-        const guns = this.state.guns.map( (gun:IPosition, i:number) => 
+        const guns = level.guns.map( (gun:IPosition, i:number) => 
             <Gun key={i} x={gun.x} y={gun.y}/>
         );
         const bullets = this.state.bullets.map( (bullet:any, i:number) => 
@@ -72,13 +65,13 @@ class Game extends React.Component<any, any> {
         <div className="game" ref={this.gameElement}>
             <div className="scrollContainer" style={{
                 left: this.state.levelOffset,
-                width: this.state.levelWidth
+                width: this.props.level.width
             }}>
-            {!gameOver? <Player {...this.props.player}/> : <></>}
-            {platforms}
-            {guns}
-            {bullets}
-            {enemies}
+                {!gameOver? <Player {...this.props.player}/> : <></>}
+                {platforms}
+                {guns}
+                {bullets}
+                {enemies}
             </div>
             {gameOver?  <div className="gameOver">GAME OVER</div> : <></>}
         </div>
@@ -89,7 +82,7 @@ class Game extends React.Component<any, any> {
         document.addEventListener('keydown', this.onKeyDown);
         document.addEventListener('keyup', this.onKeyUp);
         this.props.dispatch(gameStart());
-        this.state.enemies.forEach((enemy:any) => {
+        this.props.level.enemies.forEach((enemy:any) => {
             enemy.movementInterval = setInterval(() => {
                 this.moveEnemy(enemy);
             }, 50);
@@ -99,14 +92,14 @@ class Game extends React.Component<any, any> {
     public componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown);
         document.addEventListener('keyup', this.onKeyUp);
-        this.state.enemies.forEach( (enemy:any) => {
+        this.props.level.enemies.forEach( (enemy:any) => {
             clearInterval(enemy.movementInterval);
         });
     }
 
     private checkPowerUps() {
-        if (!this.props.player.hasGun && this.state.guns) {
-            const powerUp = this.state.guns.find( (gun: IPosition) => 
+        if (!this.props.player.hasGun && this.props.level.guns) {
+            const powerUp = this.props.level.guns.find( (gun: IPosition) => 
                 intersects(this.props.player, {
                     ...gun,
                     height: Constants.GUN_HEIGHT,
@@ -114,10 +107,7 @@ class Game extends React.Component<any, any> {
                 })
             )
             if (powerUp) {
-                this.props.dispatch(collectGun(this.state.guns.filter( (gun: IPosition) => gun.x !== powerUp.x && gun.y !== powerUp.y)))
-                this.setState({
-                    guns: this.state.guns.filter( (gun: IPosition) => gun.x !== powerUp.x && gun.y !== powerUp.y),
-                });
+                this.props.dispatch(collectGun(powerUp))
             }
         }
     }
@@ -243,20 +233,7 @@ class Game extends React.Component<any, any> {
         if(intersects(enemy, this.props.player)) {
             this.playerHit();
         }
-        this.updateEnemy(enemy);
-    }
-
-    private updateEnemy(enemy: any): Promise<void> {
-        return new Promise((resolve, reject) => {
-            this.setState({
-                enemies: this.state.enemies.map( (e:any) => {
-                    if(e.id === enemy.id) {
-                        return enemy;
-                    }
-                    return e;
-                })
-            }, resolve);
-        });
+        this.props.dispatch(updateEnemy(enemy));
     }
 
    private moveLeft() {
@@ -345,7 +322,7 @@ class Game extends React.Component<any, any> {
                     if (newX + levelOffset <= bufferSize && levelOffset < 0) {
                         /* Scroll left */
                         levelOffset -= increment;
-                    } else if (newX >= viewWidth - bufferSize && increment > 0 && levelOffset + this.state.levelWidth > viewWidth) {
+                    } else if (newX >= viewWidth - bufferSize && increment > 0 && levelOffset + this.props.level.width > viewWidth) {
                         /* Scroll right */
                         levelOffset -= increment;
                     }
@@ -375,32 +352,22 @@ class Game extends React.Component<any, any> {
     }
 
     private bulletIntersects(shape: IShape): IShape | undefined {
-        let collided = this.state.platforms.find((platform:IShape) => {
+        let collided = this.props.level.platforms.find((platform:IShape) => {
             return intersects(shape, platform);
         });
         if (collided) {
             return collided;
         }
-        collided = this.state.enemies.find((platform:IShape) => {
+        collided = this.props.level.enemies.find((platform:IShape) => {
             return intersects(shape, platform);
         });
         if (collided) {
             collided.hp--;
             if (collided.hp > 0) {
-                if (collided.hit) {
-                    // Hit a second time.
-                    collided.hit = false;
-                    this.updateEnemy(collided).then( () => {
-                        this.hitEnemy(collided);
-                    });
-                } else {
-                    this.hitEnemy(collided)
-                }
+                this.hitEnemy(collided);
             } else {
                 clearInterval(collided.movementInterval);
-                this.setState({
-                    enemies: this.state.enemies.filter( (e:any) => e.id !== collided.id)
-                });
+                this.props.dispatch(killEnemy(collided));
             }
             return collided;
         }
@@ -409,11 +376,11 @@ class Game extends React.Component<any, any> {
 
     private hitEnemy(enemy:any){
         enemy.hit = true;
-        this.updateEnemy(enemy);
-        enemy.hitTimer = setTimeout( () => {
+        this.props.dispatch(updateEnemy(enemy));
+        enemy.hitTimer = setTimeout(() => {
             enemy.hit = false;
             delete enemy.hitTimer;
-            this.updateEnemy(enemy);
+            this.props.dispatch(updateEnemy(enemy));
         }, 299);
     }
 
@@ -424,11 +391,11 @@ class Game extends React.Component<any, any> {
             shape: null,
         }
 
-        if(shape.x < 0 || shape.x + shape.width >= this.state.levelWidth) {
+        if(shape.x < 0 || shape.x + shape.width >= this.props.level.width) {
             collision.newY = -1;
             return collision;
         }
-        let collided = this.state.platforms.find((platform:IShape) => {
+        let collided = this.props.level.platforms.find((platform:IShape) => {
             return (shape.x + shape.width > platform.x && shape.x < platform.x + platform.width);
         });
         if (collided) {
@@ -443,7 +410,7 @@ class Game extends React.Component<any, any> {
             return collision;
               
         }
-        collided = this.state.enemies.find( (enemy:IShape) => {
+        collided = this.props.level.enemies.find( (enemy:IShape) => {
             return intersects(shape, enemy);
         });
         if (collided) {
@@ -461,6 +428,6 @@ class Game extends React.Component<any, any> {
 export default connect((state: any) => {
     const gameProps: any = {};
     gameProps.player = state.player;
-    gameProps.enemies = state.enemies;
+    gameProps.level = state.level;
     return gameProps;
   })(Game);

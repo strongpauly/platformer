@@ -1,7 +1,7 @@
 import {combineReducers} from 'redux';
-import {enemiesReducer} from './enemies';
+import { levelReducer } from './level';
 import { playerReducer } from './player';
 export default combineReducers({
-    enemies: enemiesReducer,
+    level: levelReducer,
     player: playerReducer
 });

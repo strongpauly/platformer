@@ -21,6 +21,7 @@ const playerDefault = {
 export function playerReducer(player:IPlayer=playerDefault, action: IAction) {
     switch (action.type) {
         case 'START' :
+        case 'LEVEL_CHANGE':
             player = {...playerDefault};
             break;
         case 'COLLECT_GUN' :

@@ -2,6 +2,7 @@ import {configure, shallow} from 'enzyme';
 import * as Adapter from 'enzyme-adapter-react-16';
 import * as React from 'react';
 import { Provider, Store } from 'react-redux';
+// import changeLevel from '../state/actions/changeLevel';
 import Game from './Game';
 
 configure({ adapter: new Adapter() });
@@ -10,7 +11,6 @@ const thunk = ({ dispatch, getState }: any) => (next: any) => (action: any) => {
   if (typeof action === 'function') {
     return action(dispatch, getState);
   }
-​
   return next(action)
 }
 
@@ -30,6 +30,7 @@ const create = () => {
 
 const mock = create();
 describe('<Game>', () => {
+
   it('can be rendered', () => {
     const wrapper = shallow(<Provider store={mock.store}>
       <Game />
@@ -37,5 +38,11 @@ describe('<Game>', () => {
     expect(wrapper).toMatchSnapshot();
   });
 
+  // it('can have change level', () => {
+  //   const wrapper = shallow(<Provider store={mock.store}>
+  //     <Game />
+  // </Provider>);
+  //   mock.store.dispatch(changeLevel('2'));
+  // });
 });
 
