@@ -6,5 +6,5 @@ export default {
     }],
     "name": "gunTest",
     "platforms": [],
-    "width": 30
+    "width": 100
 }

@@ -82,17 +82,33 @@ class Game extends React.Component<any, any> {
         document.addEventListener('keydown', this.onKeyDown);
         document.addEventListener('keyup', this.onKeyUp);
         this.props.dispatch(gameStart());
-        this.props.level.enemies.forEach((enemy:any) => {
+        this.startEnemies(this.props.level);
+    }
+    
+    
+    public componentWillUnmount() {
+        document.removeEventListener('keydown', this.onKeyDown);
+        document.removeEventListener('keyup', this.onKeyUp);
+        this.stopEnemies(this.props.level);
+    }
+
+    public componentDidUpdate(prevProps:Readonly<any>, prevState:Readonly<any>) {
+        if(prevProps.level.name !== this.props.level.name) {
+            this.stopEnemies(prevProps.level);
+            this.startEnemies(this.props.level);
+        }
+    }
+
+    private startEnemies(level:any) {
+        level.enemies.forEach((enemy:any) => {
             enemy.movementInterval = setInterval(() => {
                 this.moveEnemy(enemy);
             }, 50);
         });
     }
-    
-    public componentWillUnmount() {
-        document.removeEventListener('keydown', this.onKeyDown);
-        document.removeEventListener('keyup', this.onKeyUp);
-        this.props.level.enemies.forEach( (enemy:any) => {
+
+    private stopEnemies(level:any) {
+        level.enemies.forEach( (enemy:any) => {
             clearInterval(enemy.movementInterval);
         });
     }

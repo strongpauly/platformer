@@ -4,6 +4,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import changeLevel from '../state/actions/changeLevel';
 import store from '../state/store';
+import { Bullet } from './Bullet';
 import * as Constants from './Constants';
 import Game from './Game';
 
@@ -103,9 +104,9 @@ describe('<Game>', () => {
       expect(wrapper.find('Bullet').length).toEqual(0);
   });
 
-  it.only('can fire gun with one', () => {
+  it('can fire gun with one', () => {
       jest.useFakeTimers();
-      const wrapper = mount(<Provider store={mock.store}>
+      let wrapper = mount(<Provider store={mock.store}>
           <Game />
       </Provider>);
       mock.store.dispatch(changeLevel('gunTest'));
@@ -130,8 +131,8 @@ describe('<Game>', () => {
         key: " "
       }));
       jest.advanceTimersByTime(Constants.ANIMATION_FREQUENCY);
-      // TODO: Check bullets.
-      // expect(wrapper.state('bullets').length).toEqual(1);
+      wrapper = wrapper.update();
+      expect(wrapper.find(Bullet)).toHaveLength(1);
   });
 });
 
