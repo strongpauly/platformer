@@ -29,6 +29,27 @@ const mock = create();
 
 describe('<Game>', () => {
 
+  function startJump() {
+    document.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "ArrowUp"
+    }));
+    document.dispatchEvent(new KeyboardEvent("keyup", {
+      key: "ArrowUp"
+    }));
+  }
+
+  function startStepRight() {
+    document.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "ArrowRight"
+    }));
+  }
+
+  function stopStepRight() {
+    document.dispatchEvent(new KeyboardEvent("keyup", {
+      key: "ArrowRight"
+    }));
+  }
+
   it('can be rendered', () => {
     const wrapper = shallow(<Provider store={mock.store}>
       <Game />
@@ -52,14 +73,10 @@ describe('<Game>', () => {
     </Provider>);
     let state = mock.store.getState();
     const x = state.player.x;
-    document.dispatchEvent(new KeyboardEvent("keydown", {
-      key: "ArrowRight"
-    }));
+    startStepRight();
     // wrapper.simulate("keydown");
     jest.advanceTimersByTime(Constants.STEP_SPEED);
-    document.dispatchEvent(new KeyboardEvent("keyup", {
-      key: "ArrowRight"
-    }));
+    stopStepRight();
     state = mock.store.getState();
     expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
 });
@@ -74,13 +91,9 @@ describe('<Game>', () => {
       expect(state.level.name).toEqual("gunTest");
       expect(state.player.hasGun).toBeFalsy();
       const x = state.player.x;
-      document.dispatchEvent(new KeyboardEvent("keydown", {
-        key: "ArrowRight"
-      }));
+      startStepRight();
       jest.advanceTimersByTime(Constants.STEP_SPEED);
-      document.dispatchEvent(new KeyboardEvent("keyup", {
-        key: "ArrowRight"
-      }));
+      stopStepRight();
       state = mock.store.getState();
       expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
       expect(state.player.hasGun).toBeTruthy();
@@ -135,21 +148,58 @@ describe('<Game>', () => {
       expect(wrapper.find(Bullet)).toHaveLength(1);
   });
 
+  
+
   it('can jump', () => {
+      jest.useFakeTimers();
+      mount(<Provider store={mock.store}>
+          <Game />
+      </Provider>);
+      mock.store.dispatch(changeLevel('gunTest'));
+      let state = mock.store.getState();
+      expect(state.level.name).toEqual("gunTest");
+      expect(state.player.y).toEqual(0);
+      startJump();
+      jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
+      state = mock.store.getState();
+      expect(state.player.y).toBeGreaterThan(0);
+      expect(state.player.y).toBeLessThanOrEqual(Constants.JUMP_HEIGHT);
+      // Ensure jump has finished.
+      jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
+      state = mock.store.getState();
+      expect(state.player.y).toEqual(0);
+  });
+
+  it('can jump onto platform', () => {
+      jest.useFakeTimers();
+      mount(<Provider store={mock.store}>
+          <Game />
+      </Provider>);
+      mock.store.dispatch(changeLevel('platformTest'));
+      let state = mock.store.getState();
+      expect(state.level.name).toEqual("platformTest");
+      expect(state.player.y).toEqual(0);
+      startJump();
+      jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
+      state = mock.store.getState();
+      expect(state.player.y).toBeGreaterThan(0);
+      expect(state.player.y).toBeLessThanOrEqual(Constants.JUMP_HEIGHT);
+      // Ensure jump has finished.
+      jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
+      state = mock.store.getState();
+      expect(state.player.y).toEqual(70);
+  });
+
+  it('can fall off platform', () => {
     jest.useFakeTimers();
     mount(<Provider store={mock.store}>
         <Game />
     </Provider>);
-    mock.store.dispatch(changeLevel('gunTest'));
+    mock.store.dispatch(changeLevel('platformTest'));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("gunTest");
+    expect(state.level.name).toEqual("platformTest");
     expect(state.player.y).toEqual(0);
-    document.dispatchEvent(new KeyboardEvent("keydown", {
-      key: "ArrowUp"
-    }));
-    document.dispatchEvent(new KeyboardEvent("keyup", {
-      key: "ArrowUp"
-    }));
+    startJump();
     jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
     state = mock.store.getState();
     expect(state.player.y).toBeGreaterThan(0);
@@ -157,8 +207,16 @@ describe('<Game>', () => {
     // Ensure jump has finished.
     jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
     state = mock.store.getState();
+    expect(state.player.y).toEqual(70);
+    startStepRight();
+    jest.advanceTimersByTime(Constants.STEP_TIME * 2);
+    state = mock.store.getState();
+    expect(state.player.falling).toBeTruthy();
+    // Give time to fall
+    stopStepRight();
+    jest.advanceTimersByTime(200);
+    state = mock.store.getState();
     expect(state.player.y).toEqual(0);
-
 });
 });
 
