@@ -134,5 +134,31 @@ describe('<Game>', () => {
       wrapper = wrapper.update();
       expect(wrapper.find(Bullet)).toHaveLength(1);
   });
+
+  it('can jump', () => {
+    jest.useFakeTimers();
+    mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    mock.store.dispatch(changeLevel('gunTest'));
+    let state = mock.store.getState();
+    expect(state.level.name).toEqual("gunTest");
+    expect(state.player.y).toEqual(0);
+    document.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "ArrowUp"
+    }));
+    document.dispatchEvent(new KeyboardEvent("keyup", {
+      key: "ArrowUp"
+    }));
+    jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
+    state = mock.store.getState();
+    expect(state.player.y).toBeGreaterThan(0);
+    expect(state.player.y).toBeLessThanOrEqual(Constants.JUMP_HEIGHT);
+    // Ensure jump has finished.
+    jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
+    state = mock.store.getState();
+    expect(state.player.y).toEqual(0);
+
+});
 });
 

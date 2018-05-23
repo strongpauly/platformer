@@ -206,11 +206,12 @@ class Game extends React.Component<any, any> {
         if (!player.jumping && !player.falling) {
             let landY = player.y;
             this.props.dispatch(jumpStart());
-            const increment = (Constants.JUMP_HEIGHT / Constants.ANIMATION_FREQUENCY);
+            const calls = Constants.JUMP_TIME / Constants.ANIMATION_FREQUENCY;
+            const increment = Constants.JUMP_HEIGHT / Math.ceil(calls / 2);
+            let call = 0;
             const jumpInterval = setInterval(() => {
                 player = this.props.player;
-                const now = Date.now();
-                const percent = (now - player.jumpStart)/Constants.JUMP_TIME;
+                const percent = call / calls;
                 let newY = landY;
                 let jumping = true;
                 if (percent <= 0.5) { // On way up.
@@ -232,7 +233,8 @@ class Game extends React.Component<any, any> {
                         }
                     }
                 }
-                this.props.dispatch(jumpMove(newY, jumping));
+                call ++;
+                this.props.dispatch(jumpMove(Math.round(newY), jumping));
                 this.checkPowerUps();
             }, Constants.ANIMATION_FREQUENCY);
         }
