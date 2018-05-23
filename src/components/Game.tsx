@@ -34,6 +34,7 @@ class Game extends React.Component<any, any> {
 
     private stepInterval: any;
     private fallInterval: any;
+    private jumpInterval: any;
     private gameElement: React.RefObject<HTMLDivElement>;
 
     constructor(props: React.Props<any>) {
@@ -89,6 +90,12 @@ class Game extends React.Component<any, any> {
     public componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown);
         document.removeEventListener('keyup', this.onKeyUp);
+        clearInterval(this.fallInterval);
+        clearInterval(this.stepInterval);
+        clearInterval(this.jumpInterval);
+        this.state.bullets.forEach( (bullet:any) => {
+            clearInterval(bullet.bulletInterval);
+        })
         this.stopEnemies(this.props.level);
     }
 
@@ -166,10 +173,10 @@ class Game extends React.Component<any, any> {
     private fireGun() {
         const player: IPlayer = this.props.player;
         if (player.hasGun && this.state.bullets.length <= 7) {
-            const bullet = {
+            const bullet:any = {
                 id: this.state.bulletCount + 1,
                 x: player.x + 5,
-                y: player.y + 17
+                y: player.y + 17,
             };
             let bulletIncrement = 10;
             if (player.inverted) {
@@ -179,7 +186,7 @@ class Game extends React.Component<any, any> {
                 bulletCount: this.state.bulletCount + 1,
                 bullets: this.state.bullets.concat(bullet)
             });
-            const bulletInterval = setInterval(() => {
+            bullet.bulletInterval = setInterval(() => {
                 let newBullets = this.state.bullets;
                 const newX = bullet.x + bulletIncrement;
                 const collided = this.bulletIntersects({
@@ -189,7 +196,7 @@ class Game extends React.Component<any, any> {
                     y: bullet.y
                 });
                 if (collided || newX < 0 || newX > player.x + 1000) {
-                    clearInterval(bulletInterval);
+                    clearInterval(bullet.bulletInterval);
                     newBullets = newBullets.filter((b:any) => b.id !== bullet.id);
                 } else {
                     bullet.x = newX;
@@ -209,7 +216,7 @@ class Game extends React.Component<any, any> {
             const calls = Constants.JUMP_TIME / Constants.ANIMATION_FREQUENCY;
             const increment = Constants.JUMP_HEIGHT / Math.ceil(calls / 2);
             let call = 0;
-            const jumpInterval = setInterval(() => {
+            this.jumpInterval = setInterval(() => {
                 player = this.props.player;
                 const percent = call / calls;
                 let newY = landY;
@@ -221,7 +228,7 @@ class Game extends React.Component<any, any> {
                     if (newY < landY) { // Jump over
                         newY = landY;
                         jumping = false;
-                        clearInterval(jumpInterval);
+                        clearInterval(this.jumpInterval);
                     } else { // Check for collision
                         const platform = this.willCollide(player);
                         if (!isNaN(platform.newY) && platform.newY >= 0) {

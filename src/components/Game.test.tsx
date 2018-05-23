@@ -3,6 +3,7 @@ import * as Adapter from 'enzyme-adapter-react-16';
 import * as React from 'react';
 import { Provider } from 'react-redux';
 import changeLevel from '../state/actions/changeLevel';
+import collectGun from '../state/actions/collectGun';
 import store from '../state/store';
 import { Bullet } from './Bullet';
 import * as Constants from './Constants';
@@ -50,25 +51,34 @@ describe('<Game>', () => {
     }));
   }
 
+  function fireGun() {
+    document.dispatchEvent(new KeyboardEvent("keydown", {
+      key: " ",
+      repeat: false,
+    }));
+  }
+
   it('can be rendered', () => {
     const wrapper = shallow(<Provider store={mock.store}>
       <Game />
   </Provider>);
     expect(wrapper).toMatchSnapshot();
+    wrapper.unmount();
   });
 
   it('can change level', () => {
-    shallow(<Provider store={mock.store}>
+    const wrapper = shallow(<Provider store={mock.store}>
       <Game />
   </Provider>);
     mock.store.dispatch(changeLevel('2'));
     const state = mock.store.getState();
     expect(state.level.name).toEqual("2");
+    wrapper.unmount();
   });
 
   it('can step', () => {
     jest.useFakeTimers();
-    mount(<Provider store={mock.store}>
+    const wrapper = mount(<Provider store={mock.store}>
         <Game />
     </Provider>);
     let state = mock.store.getState();
@@ -79,11 +89,13 @@ describe('<Game>', () => {
     stopStepRight();
     state = mock.store.getState();
     expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
+
+    wrapper.unmount();
 });
 
   it('can collect gun', () => {
       jest.useFakeTimers();
-      mount(<Provider store={mock.store}>
+      const wrapper = mount(<Provider store={mock.store}>
           <Game />
       </Provider>);
       mock.store.dispatch(changeLevel('gunTest'));
@@ -97,24 +109,25 @@ describe('<Game>', () => {
       state = mock.store.getState();
       expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
       expect(state.player.hasGun).toBeTruthy();
+
+      wrapper.unmount();
   });
 
   it('cannot fire gun without one', () => {
       jest.useFakeTimers();
-      const wrapper = mount(<Provider store={mock.store}>
+      let wrapper = mount(<Provider store={mock.store}>
           <Game />
       </Provider>);
       mock.store.dispatch(changeLevel('gunTest'));
       const state = mock.store.getState();
       expect(state.level.name).toEqual("gunTest");
       expect(state.player.hasGun).toBeFalsy();
-      document.dispatchEvent(new KeyboardEvent("keydown", {
-        key: " "
-      }));
-      document.dispatchEvent(new KeyboardEvent("keyup", {
-        key: " "
-      }));
+      fireGun();
+      jest.advanceTimersByTime(Constants.ANIMATION_FREQUENCY);
+      wrapper = wrapper.update();
       expect(wrapper.find('Bullet').length).toEqual(0);
+
+      wrapper.unmount();
   });
 
   it('can fire gun with one', () => {
@@ -127,32 +140,22 @@ describe('<Game>', () => {
       expect(state.level.name).toEqual("gunTest");
       expect(state.player.hasGun).toBeFalsy();
       const x = state.player.x;
-      document.dispatchEvent(new KeyboardEvent("keydown", {
-        key: "ArrowRight"
-      }));
+      startStepRight();
       jest.advanceTimersByTime(Constants.STEP_SPEED);
-      document.dispatchEvent(new KeyboardEvent("keyup", {
-        key: "ArrowRight"
-      }));
+      stopStepRight();
       state = mock.store.getState();
       expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
       expect(state.player.hasGun).toBeTruthy();
-      document.dispatchEvent(new KeyboardEvent("keydown", {
-        key: " "
-      }));
-      document.dispatchEvent(new KeyboardEvent("keyup", {
-        key: " "
-      }));
+      fireGun();
       jest.advanceTimersByTime(Constants.ANIMATION_FREQUENCY);
       wrapper = wrapper.update();
       expect(wrapper.find(Bullet)).toHaveLength(1);
+      wrapper.unmount();
   });
-
   
-
   it('can jump', () => {
       jest.useFakeTimers();
-      mount(<Provider store={mock.store}>
+      const wrapper = mount(<Provider store={mock.store}>
           <Game />
       </Provider>);
       mock.store.dispatch(changeLevel('gunTest'));
@@ -168,11 +171,12 @@ describe('<Game>', () => {
       jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
       state = mock.store.getState();
       expect(state.player.y).toEqual(0);
+      wrapper.unmount();
   });
 
   it('can jump onto platform', () => {
       jest.useFakeTimers();
-      mount(<Provider store={mock.store}>
+      const wrapper = mount(<Provider store={mock.store}>
           <Game />
       </Provider>);
       mock.store.dispatch(changeLevel('platformTest'));
@@ -188,11 +192,12 @@ describe('<Game>', () => {
       jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
       state = mock.store.getState();
       expect(state.player.y).toEqual(70);
+      wrapper.unmount();
   });
 
   it('can fall off platform', () => {
     jest.useFakeTimers();
-    mount(<Provider store={mock.store}>
+    const wrapper = mount(<Provider store={mock.store}>
         <Game />
     </Provider>);
     mock.store.dispatch(changeLevel('platformTest'));
@@ -217,6 +222,57 @@ describe('<Game>', () => {
     jest.advanceTimersByTime(200);
     state = mock.store.getState();
     expect(state.player.y).toEqual(0);
+    wrapper.unmount();
 });
+
+  // it('can shoot enemies', () => {
+  //   jest.useFakeTimers();
+  //   const wrapper = mount(<Provider store={mock.store}>
+  //       <Game />
+  //   </Provider>);
+  //   mock.store.dispatch(changeLevel('enemyTest'));
+  //   let state = mock.store.getState();
+  //   expect(state.level.name).toEqual("enemyTest");
+  //   expect(state.level.enemies).toHaveLength(1);
+  //   expect(state.level.enemies[0].hp).toEqual(2);
+  //   expect(state.player.hasGun).toBeFalsy();
+  //   mock.store.dispatch(collectGun({x:0, y:0, width:1, height:1}));
+  //   state = mock.store.getState();
+  //   expect(state.player.hasGun).toBeTruthy();
+  //   fireGun();
+  //   jest.advanceTimersByTime(1000);
+  //   state = mock.store.getState();
+  //   expect(state.level.enemies).toHaveLength(1);
+  //   expect(state.level.enemies[0].hp).toEqual(1);
+  //   wrapper.unmount();
+  // });
+
+  it('can kill enemies', () => {
+    jest.useFakeTimers();
+    let wrapper = mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    mock.store.dispatch(changeLevel('enemyTest'));
+    let state = mock.store.getState();
+    expect(state.level.name).toEqual("enemyTest");
+    expect(state.level.enemies).toHaveLength(1);
+    expect(state.level.enemies[0].hp).toEqual(2);
+    expect(state.player.hasGun).toBeFalsy();
+    mock.store.dispatch(collectGun({x:0, y:0, width:1, height:1}));
+    state = mock.store.getState();
+    expect(state.player.hasGun).toBeTruthy();
+    fireGun();
+    wrapper = wrapper.update();
+    expect(wrapper.find(Bullet)).toHaveLength(1);
+    jest.advanceTimersByTime(1000);
+    state = mock.store.getState();
+    expect(state.level.enemies).toHaveLength(1);
+    expect(state.level.enemies[0].hp).toEqual(1);
+    fireGun();
+    jest.advanceTimersByTime(1000);
+    state = mock.store.getState();
+    expect(state.level.enemies).toHaveLength(0);
+    wrapper.unmount();
+  });
 });
 
