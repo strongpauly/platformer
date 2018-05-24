@@ -10,6 +10,12 @@ export function levelReducer(level:any=levels['1'], action:any) {
         case 'START' :
             level = {
                 ...level,
+                doors: level.doors.map((door: any, index:number) => ({
+                    ...door,
+                    height: Constants.DOOR_HEIGHT,
+                    id: level.name + '_' + index,
+                    width: Constants.DOOR_WIDTH
+                })),
                 enemies: level.enemies.map((enemy: any, index:number) => ({
                     ...enemy,
                     height: Constants.ENEMY_HEIGHT,
@@ -45,7 +51,7 @@ export function levelReducer(level:any=levels['1'], action:any) {
             level = {
                 ...level,
                 door: level.doors.map( (d:any) => {
-                    if(d.x === action.payload.x && d.y === action.payload.y) {
+                    if(d.id === action.payload.id) {
                         action.payload.open = true;
                         return action.payload;
                     }

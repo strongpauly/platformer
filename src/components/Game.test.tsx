@@ -57,6 +57,12 @@ describe('<Game>', () => {
     }));
   }
 
+  function stepRight(px:number) {
+    startStepRight();
+    jest.advanceTimersByTime((px / Constants.STEP_WIDTH) * Constants.STEP_SPEED)
+    stopStepRight();
+  }
+
   function startStepLeft() {
     document.dispatchEvent(new KeyboardEvent("keydown", {
       key: "ArrowLeft"
@@ -108,6 +114,18 @@ describe('<Game>', () => {
       expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
       wrapper.unmount();
   });
+
+  it('can\'t step through platform', () => {
+    jest.useFakeTimers();
+    const wrapper = mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    let state = mock.store.getState();
+    stepRight(80);
+    state = mock.store.getState();
+    expect(state.player.x).toEqual(90 - Constants.PLAYER_WIDTH);
+    wrapper.unmount();
+});
 
   it('can move enemies', () => {
     jest.useFakeTimers();
@@ -440,6 +458,26 @@ it('can fall off onto overlapping platform', () => {
     expect(state.player.hp).toEqual(2);
     expect(state.player.invulnerable).toBeTruthy();
     stopStepRight();
+    wrapper.unmount();
+  });
+
+  it('players can run into doors', () => {
+    jest.useFakeTimers();
+    const wrapper = mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    mock.store.dispatch(changeLevel('doorTest'));
+    let state = mock.store.getState();
+    expect(state.level.name).toEqual("doorTest");
+    expect(state.level.doors).toHaveLength(1);
+    expect(state.level.doors[0].open).toBeFalsy();
+    const levelName = state.level.doors[0].to;
+    stepRight(35);
+    state = mock.store.getState();
+    expect(state.level.doors[0].open).toBeTruthy();
+    stepRight(20);
+    state = mock.store.getState();
+    expect(state.level.name).toEqual(levelName);
     wrapper.unmount();
   });
 });

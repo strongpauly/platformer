@@ -68,7 +68,7 @@ class Game extends React.Component<any, any> {
             <Bullet key={bullet.id} x={bullet.x} y={bullet.y}/>
         );
         const doors = level.doors.map( (door:any, i:number) => 
-            <Door key={door.id} x={door.x} y={door.y} open={door.open}/>
+            <Door key={i} x={door.x} y={door.y} open={door.open}/>
         );
         const gameOver = this.props.player.hp <= 0;
         return (
@@ -149,12 +149,8 @@ class Game extends React.Component<any, any> {
     }
 
     private checkDoors() {
-        const door = this.props.level.doors.find( (d: IPosition) => 
-            intersects(this.props.player, {
-                ...d,
-                height: Constants.DOOR_HEIGHT,
-                width: Constants.DOOR_WIDTH
-            })
+        const door = this.props.level.doors.find( (d: IShape) => 
+            intersects(this.props.player, d)
         )
         if (door) {
             this.props.dispatch(openDoor(door));

@@ -1,6 +1,7 @@
 export default {
     "doors":[{
-        to: "1",
+        open: false,
+        to: "2",
         x: 50,
         y: 0,
     }],
