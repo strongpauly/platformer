@@ -3,7 +3,7 @@ import {createLogger} from 'redux-logger';
 import { IAction } from './actions/IAction';
 import reducers from './reducers/';
 
-const middlewares = [];
+const middlewares:any[] = [];
 /* istanbul ignore if */
 if (process.env.NODE_ENV === 'development') {
   const logger = createLogger({
@@ -14,4 +14,8 @@ if (process.env.NODE_ENV === 'development') {
   middlewares.push(logger);
 }
 
-export default createStore(reducers, applyMiddleware(...middlewares));
+export function createPlatformerStore() {
+  return createStore(reducers, applyMiddleware(...middlewares));
+}
+
+export default createPlatformerStore();

@@ -4,7 +4,7 @@ import * as React from 'react';
 import { Provider } from 'react-redux';
 import changeLevel from '../state/actions/changeLevel';
 import collectGun from '../state/actions/collectGun';
-import store from '../state/store';
+import { createPlatformerStore } from '../state/store';
 import { Bullet } from './Bullet';
 import * as Constants from './Constants';
 import Game from './Game';
@@ -18,17 +18,23 @@ const thunk = ({ dispatch, getState }: any) => (next: any) => (action: any) => {
   return next(action)
 }
 
+let store = createPlatformerStore();
+
 const create = () => {
   const next = jest.fn()
-​
   const invoke = (action:any) => thunk(store)(next)(action)
 ​
   return {store, next, invoke}
 };
 
-const mock = create();
+let mock = create();
 
 describe('<Game>', () => {
+
+  beforeEach( () => {
+    store = createPlatformerStore();
+    mock = create();
+  })
 
   function startJump() {
     document.dispatchEvent(new KeyboardEvent("keydown", {
@@ -225,27 +231,27 @@ describe('<Game>', () => {
     wrapper.unmount();
 });
 
-  // it('can shoot enemies', () => {
-  //   jest.useFakeTimers();
-  //   const wrapper = mount(<Provider store={mock.store}>
-  //       <Game />
-  //   </Provider>);
-  //   mock.store.dispatch(changeLevel('enemyTest'));
-  //   let state = mock.store.getState();
-  //   expect(state.level.name).toEqual("enemyTest");
-  //   expect(state.level.enemies).toHaveLength(1);
-  //   expect(state.level.enemies[0].hp).toEqual(2);
-  //   expect(state.player.hasGun).toBeFalsy();
-  //   mock.store.dispatch(collectGun({x:0, y:0, width:1, height:1}));
-  //   state = mock.store.getState();
-  //   expect(state.player.hasGun).toBeTruthy();
-  //   fireGun();
-  //   jest.advanceTimersByTime(1000);
-  //   state = mock.store.getState();
-  //   expect(state.level.enemies).toHaveLength(1);
-  //   expect(state.level.enemies[0].hp).toEqual(1);
-  //   wrapper.unmount();
-  // });
+  it('can shoot enemies', () => {
+    jest.useFakeTimers();
+    const wrapper = mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    mock.store.dispatch(changeLevel('enemyTest'));
+    let state = mock.store.getState();
+    expect(state.level.name).toEqual("enemyTest");
+    expect(state.level.enemies).toHaveLength(1);
+    expect(state.level.enemies[0].hp).toEqual(2);
+    expect(state.player.hasGun).toBeFalsy();
+    mock.store.dispatch(collectGun({x:0, y:0, width:1, height:1}));
+    state = mock.store.getState();
+    expect(state.player.hasGun).toBeTruthy();
+    fireGun();
+    jest.advanceTimersByTime(1000);
+    state = mock.store.getState();
+    expect(state.level.enemies).toHaveLength(1);
+    expect(state.level.enemies[0].hp).toEqual(1);
+    wrapper.unmount();
+  });
 
   it('can kill enemies', () => {
     jest.useFakeTimers();

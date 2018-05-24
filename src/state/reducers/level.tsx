@@ -3,10 +3,7 @@ import * as Constants from '../../components/Constants';
 import { IPosition } from '../../components/IPosition';
 import { levels }  from '../../levels';
 
-export function levelReducer(level:any=null, action:any) {
-    if(level === null) {
-        level = levels['1'];
-    }
+export function levelReducer(level:any=levels['1'], action:any) {
     switch (action.type) {
         case 'LEVEL_CHANGE':
             level = _.cloneDeep(levels[action.payload]);
