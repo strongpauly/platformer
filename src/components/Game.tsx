@@ -36,6 +36,7 @@ class Game extends React.Component<any, any> {
     private fallInterval: any;
     private jumpInterval: any;
     private gameElement: React.RefObject<HTMLDivElement>;
+    private currentLevel: string;
 
     constructor(props: React.Props<any>) {
         super(props);
@@ -83,9 +84,7 @@ class Game extends React.Component<any, any> {
         document.addEventListener('keydown', this.onKeyDown);
         document.addEventListener('keyup', this.onKeyUp);
         this.props.dispatch(gameStart());
-        this.startEnemies(this.props.level);
     }
-    
     
     public componentWillUnmount() {
         document.removeEventListener('keydown', this.onKeyDown);
@@ -100,9 +99,12 @@ class Game extends React.Component<any, any> {
     }
 
     public componentDidUpdate(prevProps:Readonly<any>, prevState:Readonly<any>) {
-        if(prevProps.level.name !== this.props.level.name) {
-            this.stopEnemies(prevProps.level);
+        if(!this.currentLevel || this.currentLevel !== this.props.level.name) {
+            if (this.currentLevel) {
+                this.stopEnemies(prevProps.level);
+            }
             this.startEnemies(this.props.level);
+            this.currentLevel = this.props.level.name;
         }
     }
 

@@ -280,5 +280,39 @@ describe('<Game>', () => {
     expect(state.level.enemies).toHaveLength(0);
     wrapper.unmount();
   });
+
+  it('enemies can run into player', () => {
+    jest.useFakeTimers();
+    let wrapper = mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    mock.store.dispatch(changeLevel('hitTest'));
+    let state = mock.store.getState();
+    expect(state.level.name).toEqual("hitTest");
+    expect(state.level.enemies).toHaveLength(1);
+    expect(state.player.hp).toEqual(3);
+    jest.advanceTimersByTime(250);
+    state = mock.store.getState();
+    // Enemy should have walked into player.
+    expect(state.player.hp).toEqual(2);
+    expect(state.player.invulnerable).toBeTruthy();
+    jest.advanceTimersByTime(3000);
+    state = mock.store.getState();
+    expect(state.player.invulnerable).toBeFalsy();
+    jest.advanceTimersByTime(250);
+    state = mock.store.getState();
+    expect(state.player.hp).toEqual(1);
+    expect(state.player.invulnerable).toBeTruthy();
+    jest.advanceTimersByTime(3000);
+    state = mock.store.getState();
+    expect(state.player.invulnerable).toBeFalsy();
+    jest.advanceTimersByTime(250);
+    state = mock.store.getState();
+    expect(state.player.hp).toEqual(0);
+    wrapper = wrapper.update();
+    // Should display game over message.
+    expect(wrapper.find('.gameOver')).toHaveLength(1);
+    wrapper.unmount();
+  });
 });
 
