@@ -1,5 +1,12 @@
 export default {
-    "enemies": [],
+    "enemies": [{
+        "hp": 2,
+        "maxX": 0,
+        "minX": 0,
+        "speed": 2,
+        "x": 20,
+        "y": 0
+    }],
     "guns": [],
     "name": "platformTest",
     "platforms": [{

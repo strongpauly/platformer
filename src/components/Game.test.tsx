@@ -284,6 +284,10 @@ describe('<Game>', () => {
     jest.advanceTimersByTime(200);
     state = mock.store.getState();
     expect(state.player.y).toEqual(0);
+
+    // Fell onto an enemy.
+    expect(state.player.hp).toEqual(2);
+    expect(state.player.invulnerable).toBeTruthy();
     wrapper.unmount();
 });
 
