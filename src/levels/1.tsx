@@ -13,6 +13,13 @@ export default {
         "speed": 2,
         "x": 700,
         "y": 0
+    }, {
+        "hp": 10,
+        "maxX": 1300,
+        "minX": 1000,
+        "speed": 4,
+        "x": 1250,
+        "y": 0
     }],
     "guns": [{
         "x": 380,
