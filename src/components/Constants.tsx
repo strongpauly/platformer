@@ -11,3 +11,4 @@ export const GUN_HEIGHT = 15;
 export const ANIMATION_FREQUENCY = 15;
 export const ENEMY_WIDTH = 20;
 export const ENEMY_HEIGHT = 30;
+export const ENEMY_UPDATE_FREQUENCY = 50;

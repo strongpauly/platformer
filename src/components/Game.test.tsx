@@ -57,6 +57,18 @@ describe('<Game>', () => {
     }));
   }
 
+  function startStepLeft() {
+    document.dispatchEvent(new KeyboardEvent("keydown", {
+      key: "ArrowLeft"
+    }));
+  }
+
+  function stopStepLeft() {
+    document.dispatchEvent(new KeyboardEvent("keyup", {
+      key: "ArrowLeft"
+    }));
+  }
+
   function fireGun() {
     document.dispatchEvent(new KeyboardEvent("keydown", {
       key: " ",
@@ -83,21 +95,36 @@ describe('<Game>', () => {
   });
 
   it('can step', () => {
+      jest.useFakeTimers();
+      const wrapper = mount(<Provider store={mock.store}>
+          <Game />
+      </Provider>);
+      let state = mock.store.getState();
+      const x = state.player.x;
+      startStepRight();
+      jest.advanceTimersByTime(Constants.STEP_SPEED);
+      stopStepRight();
+      state = mock.store.getState();
+      expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
+      wrapper.unmount();
+  });
+
+  it('can move enemies', () => {
     jest.useFakeTimers();
     const wrapper = mount(<Provider store={mock.store}>
         <Game />
     </Provider>);
     let state = mock.store.getState();
-    const x = state.player.x;
-    startStepRight();
-    // wrapper.simulate("keydown");
-    jest.advanceTimersByTime(Constants.STEP_SPEED);
-    stopStepRight();
+    expect(state.level.enemies.length).toBeGreaterThanOrEqual(2);
+    const x0 = state.level.enemies[0].x;
+    const x1 = state.level.enemies[1].x;
+    jest.advanceTimersByTime(Constants.ENEMY_UPDATE_FREQUENCY);
     state = mock.store.getState();
-    expect(state.player.x).toEqual(x + Constants.STEP_WIDTH);
+    expect(state.level.enemies[0].x).not.toEqual(x0);
+    expect(state.level.enemies[1].x).not.toEqual(x1);
 
     wrapper.unmount();
-});
+  })
 
   it('can collect gun', () => {
       jest.useFakeTimers();
@@ -158,6 +185,35 @@ describe('<Game>', () => {
       expect(wrapper.find(Bullet)).toHaveLength(1);
       wrapper.unmount();
   });
+
+  it('can fire gun left', () => {
+    jest.useFakeTimers();
+    let wrapper = mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    mock.store.dispatch(changeLevel('gunTest'));
+    let state = mock.store.getState();
+    expect(state.level.name).toEqual("gunTest");
+    expect(state.player.hasGun).toBeFalsy();
+    const x = state.player.x;
+    const steps = 10;
+    startStepRight();
+    jest.advanceTimersByTime(Constants.STEP_SPEED * steps);
+    stopStepRight();
+    state = mock.store.getState();
+    expect(state.player.x).toEqual(x + (Constants.STEP_WIDTH * steps));
+    expect(state.player.hasGun).toBeTruthy();
+    startStepLeft();
+    jest.advanceTimersByTime(Constants.STEP_SPEED);
+    stopStepLeft();
+    state = mock.store.getState();
+    expect(state.player.x).toEqual(x + (Constants.STEP_WIDTH * (steps - 1)));
+    fireGun();
+    jest.advanceTimersByTime(Constants.ANIMATION_FREQUENCY);
+    wrapper = wrapper.update();
+    expect(wrapper.find(Bullet)).toHaveLength(1);
+    wrapper.unmount();
+});
   
   it('can jump', () => {
       jest.useFakeTimers();
@@ -312,6 +368,26 @@ describe('<Game>', () => {
     wrapper = wrapper.update();
     // Should display game over message.
     expect(wrapper.find('.gameOver')).toHaveLength(1);
+    wrapper.unmount();
+  });
+
+  it('players can run into enemies', () => {
+    jest.useFakeTimers();
+    const wrapper = mount(<Provider store={mock.store}>
+        <Game />
+    </Provider>);
+    mock.store.dispatch(changeLevel('playerTest'));
+    let state = mock.store.getState();
+    expect(state.level.name).toEqual("playerTest");
+    expect(state.level.enemies).toHaveLength(1);
+    expect(state.player.hp).toEqual(3);
+    startStepRight();
+    jest.advanceTimersByTime(3000);
+    state = mock.store.getState();
+    // Enemy should have walked into player.
+    expect(state.player.hp).toEqual(2);
+    expect(state.player.invulnerable).toBeTruthy();
+    stopStepRight();
     wrapper.unmount();
   });
 });

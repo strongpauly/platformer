@@ -24,7 +24,7 @@ export function levelReducer(level:any=levels['1'], action:any) {
                 guns: level.guns.filter((gun: IPosition) => gun.x !== action.payload.x && gun.y !== action.payload.y)
             }
             break;
-        case 'UPDATE_ENEMY': 
+        case 'UPDATE_ENEMY':
             level = {
                 ...level,
                 enemies: level.enemies.map( (e:any) => {

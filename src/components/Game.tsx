@@ -35,6 +35,7 @@ class Game extends React.Component<any, any> {
     private stepInterval: any;
     private fallInterval: any;
     private jumpInterval: any;
+    private enemyInterval: any;
     private gameElement: React.RefObject<HTMLDivElement>;
     private currentLevel: string;
 
@@ -109,17 +110,14 @@ class Game extends React.Component<any, any> {
     }
 
     private startEnemies(level:any) {
-        level.enemies.forEach((enemy:any) => {
-            enemy.movementInterval = setInterval(() => {
-                this.moveEnemy(enemy);
-            }, 50);
-        });
+        this.enemyInterval = setInterval(() => {
+            this.moveEnemies();
+        }, Constants.ENEMY_UPDATE_FREQUENCY);
+        
     }
 
     private stopEnemies(level:any) {
-        level.enemies.forEach( (enemy:any) => {
-            clearInterval(enemy.movementInterval);
-        });
+        clearInterval(this.enemyInterval);
     }
 
     private checkPowerUps() {
@@ -249,7 +247,15 @@ class Game extends React.Component<any, any> {
         }
    }
 
-   private moveEnemy = (enemy: any) => {
+   private moveEnemies = () => {
+        this.props.level.enemies.forEach((enemy:any) => {
+            if(enemy.maxX !== enemy.minX) {
+                this.moveEnemy(enemy);
+            }
+        });
+   }
+
+   private moveEnemy(enemy: any){
         enemy.x += (enemy.inverted ? -enemy.speed : enemy.speed);
         if (enemy.x <= enemy.minX) {
             enemy.inverted = false;
@@ -300,11 +306,7 @@ class Game extends React.Component<any, any> {
                 this.fireGun();
                 event.preventDefault();
                 break;
-            
-            default :
-                break;
         }
-        return;
     }
 
     private onKeyUp = (event: KeyboardEvent) => {

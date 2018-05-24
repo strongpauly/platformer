@@ -5,6 +5,7 @@ import enemyTest from './enemyTest';
 import gunTest from './gunTest';
 import hitTest from './hitTest';
 import platformTest from './platformTest';
+import playerTest from './playerTest';
 
 export const levels = {
     1: one,
@@ -13,5 +14,6 @@ export const levels = {
     enemyTest,
     gunTest,
     hitTest,
-    platformTest
+    platformTest,
+    playerTest
 };
