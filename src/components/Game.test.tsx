@@ -291,6 +291,54 @@ describe('<Game>', () => {
     wrapper.unmount();
 });
 
+it('can jump onto overlapping platform', () => {
+  jest.useFakeTimers();
+  const wrapper = mount(<Provider store={mock.store}>
+      <Game />
+  </Provider>);
+  mock.store.dispatch(changeLevel('platformTest2'));
+  let state = mock.store.getState();
+  expect(state.level.name).toEqual("platformTest2");
+  expect(state.player.y).toEqual(0);
+  startJump();
+  startStepRight();
+  jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
+  state = mock.store.getState();
+  // Ensure jump has finished.
+  jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
+  state = mock.store.getState();
+  expect(state.player.y).toEqual(60);
+  wrapper.unmount();
+});
+
+it('can fall off onto overlapping platform', () => {
+  jest.useFakeTimers();
+  const wrapper = mount(<Provider store={mock.store}>
+      <Game />
+  </Provider>);
+  mock.store.dispatch(changeLevel('platformTest2'));
+  let state = mock.store.getState();
+  expect(state.level.name).toEqual("platformTest2");
+  expect(state.player.y).toEqual(0);
+  startJump();
+  startStepRight();
+  jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
+  state = mock.store.getState();
+  // Ensure jump has finished.
+  jest.advanceTimersByTime((Constants.JUMP_TIME / 2) + Constants.ANIMATION_FREQUENCY);
+  stopStepRight();
+  state = mock.store.getState();
+  expect(state.player.y).toEqual(60);
+  expect(state.player.x).toEqual(85);
+  startStepLeft();
+  // Move 60px
+  jest.advanceTimersByTime(60 * Constants.STEP_SPEED * Constants.STEP_WIDTH);
+  state = mock.store.getState();
+  expect(state.player.x).toEqual(25);
+  expect(state.player.y).toEqual(40);
+  wrapper.unmount();
+});
+
   it('can shoot enemies', () => {
     jest.useFakeTimers();
     const wrapper = mount(<Provider store={mock.store}>

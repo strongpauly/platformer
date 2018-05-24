@@ -34,6 +34,21 @@ export default {
         "width": 90,
         "x": 360,
         "y": 80
+    }, {
+        "height": 20,
+        "width": 50,
+        "x": 800,
+        "y": 20
+    }, {
+        "height": 20,
+        "width": 90,
+        "x": 900,
+        "y": 40
+    }, {
+        "height": 20,
+        "width": 90,
+        "x": 1000,
+        "y": 80
     }],
     "width": 1500
 }

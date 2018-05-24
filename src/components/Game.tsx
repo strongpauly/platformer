@@ -27,6 +27,7 @@ import {Player} from './Player';
 
 interface ICollision {
     shape: IShape | null;
+    canMove: boolean;
     newY: number;
     isEnemy: boolean;
 }
@@ -230,9 +231,9 @@ class Game extends React.Component<any, any> {
                         jumping = false;
                         clearInterval(this.jumpInterval);
                     } else { // Check for collision
-                        const platform = this.willCollide(player);
-                        if (!isNaN(platform.newY) && platform.newY >= 0) {
-                            landY = platform.newY;
+                        const collision = this.willCollide(player);
+                        if (collision.canMove) {
+                            landY = collision.newY;
                             // Prevent falling through floor.
                             if (newY < landY) {
                                 newY = landY;
@@ -270,22 +271,12 @@ class Game extends React.Component<any, any> {
 
    private moveLeft() {
        const player:IPlayer = this.props.player;
-       this.step({
-            height: Constants.PLAYER_HEIGHT,
-            width: Constants.PLAYER_WIDTH,            
-            x: player.x <= Constants.STEP_WIDTH ? 0 : player.x - Constants.STEP_WIDTH,
-            y: player.y
-       }, true);
+       this.step(player.x <= Constants.STEP_WIDTH ? 0 : player.x - Constants.STEP_WIDTH, true);
    }
 
     private moveRight() {
         const player:IPlayer = this.props.player;
-        this.step({
-            height: Constants.PLAYER_HEIGHT,
-            width: Constants.PLAYER_WIDTH,
-            x: player.x + Constants.STEP_WIDTH,
-            y: player.y,
-       }, false);
+        this.step(player.x + Constants.STEP_WIDTH, false);
     }
 
     private onKeyDown = (event: KeyboardEvent) => {
@@ -322,26 +313,22 @@ class Game extends React.Component<any, any> {
         return;
     }
 
-    private step(coords: IShape, inverted:boolean) {
+    private step(wantedX:number, inverted:boolean) {
         if (isNaN(this.stepInterval)) {
             let player: IPlayer = this.props.player;
             this.props.dispatch(stepStart(inverted));
-            const increment = coords.x - player.x;
-            let newX = coords.x - increment;
+            const increment = wantedX - player.x;
+            let newX = wantedX - increment;
             this.stepInterval = setInterval(() => {
                 player = this.props.player;
                 newX += increment;
                 let stepping = true;
                 const collision:ICollision = this.willCollide({
-                    ...coords,
-                    x: newX,
-                    y: player.y
+                    ...player,
+                    x: newX
                 });
                 let levelOffset = this.state.levelOffset;
-                if(collision.isEnemy && !player.invulnerable) {
-                    newX = player.x;
-                    this.playerHit();
-                } else if(collision.newY === -1) {
+                if(!collision.canMove) {
                     newX = player.x;
                     stepping = false;
                 } else if (this.gameElement.current){
@@ -356,11 +343,14 @@ class Game extends React.Component<any, any> {
                     }
                 }
                 this.props.dispatch(stepMove(newX, stepping));
+                if (collision.isEnemy && !player.invulnerable) {
+                    this.playerHit();
+                }
                 this.setState({
                     levelOffset
                 });
                 this.checkPowerUps();
-                if (!isNaN(collision.newY) && collision.newY !== player.y && !player.jumping && stepping) {
+                if (collision.canMove && !isNaN(collision.newY) && collision.newY !== player.y && !player.jumping && stepping) {
                     this.fall();
                 }
             }, Constants.STEP_SPEED);
@@ -412,41 +402,50 @@ class Game extends React.Component<any, any> {
         }, 299);
     }
 
-    private willCollide(shape: IShape): ICollision {
+    private willCollide(player: IPlayer): ICollision {
         const collision: ICollision = {
+            canMove: true,
             isEnemy: false,
             newY: NaN,
             shape: null,
         }
 
-        if(shape.x < 0 || shape.x + shape.width >= this.props.level.width) {
-            collision.newY = -1;
+        // Check for outside level.
+        if(player.x < 0 || player.x + player.width >= this.props.level.width) {
+            collision.canMove = false;
             return collision;
         }
-        let collided = this.props.level.platforms.find((platform:IShape) => {
-            return (shape.x + shape.width > platform.x && shape.x < platform.x + platform.width);
+        const platforms = this.props.level.platforms.filter((p:IShape) => {
+            return (player.x + player.width > p.x && player.x < p.x + p.width);
         });
-        if (collided) {
-            collision.shape = collided;
+        let platform;
+        if (platforms.length > 0) {
+            // Pick highest.
+            platforms.sort( (a:IShape, b:IShape) => {
+                return b.y - a.y;
+            });
+            platform = platforms[0];
+            collision.shape = platform;
             // Jumped/fell onto platform
-            if (shape.y >= collided.y && (this.props.player.jumping || this.props.player.falling)) {
-                collision.newY = collided.y + collided.height;
-            } else if (intersects(shape, collided)) {
+            if (player.y >= platform.y) {
+                collision.newY = platform.y + platform.height;
+            } else if (intersects(player, platform)) {
                 // Walked into platform.
-                collision.newY = -1;
+                collision.canMove = false;
             }
             return collision;
               
         }
-        collided = this.props.level.enemies.find( (enemy:IShape) => {
-            return intersects(shape, enemy);
+        // Enemies shouldn't overlap
+        const enemy = this.props.level.enemies.find( (e:IShape) => {
+            return intersects(player, e);
         });
-        if (collided) {
-            collision.shape = collided;
+        if (enemy) {
+            collision.shape = enemy;
             collision.isEnemy = true;
         }
         // Check for falling off platform  
-        if (shape.y > 0) {
+        if (player.y > 0) {
             collision.newY = 0;
         }
         return collision;
