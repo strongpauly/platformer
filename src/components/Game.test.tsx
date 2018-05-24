@@ -18,7 +18,7 @@ const thunk = ({ dispatch, getState }: any) => (next: any) => (action: any) => {
   return next(action)
 }
 
-let store = createPlatformerStore();
+let store:any;
 
 const create = () => {
   const next = jest.fn()
