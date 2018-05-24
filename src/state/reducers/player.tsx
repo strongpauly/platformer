@@ -9,7 +9,7 @@ const playerDefault = {
     hp: 3,
     inverted: false,
     invulnerable: false,
-    jumpStart: NaN,
+    jumpPercent: NaN,
     jumping: false,
     stepStart: NaN,
     stepping: false,
@@ -46,13 +46,14 @@ export function playerReducer(player:IPlayer=playerDefault, action: IAction) {
         case 'JUMP_START':
             player = {
                 ...player,
-                jumpStart: Date.now(),
+                jumpPercent: 0,
                 jumping: true,
             };
             break;
         case 'JUMP_MOVE':
             player = {
                 ...player,
+                jumpPercent: action.payload.jumpPercent,
                 jumping: action.payload.jumping,
                 y: action.payload.y
             };

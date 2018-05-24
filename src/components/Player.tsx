@@ -18,10 +18,9 @@ export class Player extends React.Component<IPlayer> {
         }
         const now = Date.now();
         if (this.props.jumping) {
-            const percent = (now - this.props.jumpStart)/Constants.JUMP_TIME;
-            if (percent <= 0.33) {
+            if (this.props.jumpPercent <= 0.33) {
                 classNames.push("jumping-up");
-            } else if(percent <= 0.66) {
+            } else if(this.props.jumpPercent <= 0.66) {
                 classNames.push("jumping-apex");
             } else {
                 classNames.push("jumping-down");

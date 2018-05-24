@@ -6,7 +6,7 @@ export interface IPlayer extends IShape {
     hp: number;
     inverted: boolean;
     invulnerable: boolean;
-    jumpStart: number;
+    jumpPercent: number;
     jumping: boolean;
     stepStart: number;
     stepping: boolean;

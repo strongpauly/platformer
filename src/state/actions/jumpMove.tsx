@@ -1,6 +1,7 @@
-export default function jumpMove(y: number, jumping: boolean) {
+export default function jumpMove(y: number, jumpPercent: number, jumping: boolean) {
     return {
         payload: {
+            jumpPercent,
             jumping,
             y,
         },

@@ -241,7 +241,7 @@ class Game extends React.Component<any, any> {
                     }
                 }
                 call ++;
-                this.props.dispatch(jumpMove(Math.round(newY), jumping));
+                this.props.dispatch(jumpMove(Math.round(newY), percent, jumping));
                 this.checkPowerUps();
             }, Constants.ANIMATION_FREQUENCY);
         }
