@@ -1,4 +1,5 @@
 export default {
+    "doors":[],
     "enemies": [],
     "guns": [],
     "name": "platformTest2",

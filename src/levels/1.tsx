@@ -1,4 +1,9 @@
 export default {
+    "doors": [{
+       "to": "2",
+       "x": 1450,
+       "y": 0,
+    }],
     "enemies": [{
         "hp": 10,
         "maxX": 600,

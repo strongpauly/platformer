@@ -1,4 +1,5 @@
 export default {
+    "doors":[],
     "enemies": [],
     "guns": [{
         "x": 18,

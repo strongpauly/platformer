@@ -41,7 +41,18 @@ export function levelReducer(level:any=levels['1'], action:any) {
                 enemies: level.enemies.filter( (e:any) => e.id !== action.payload.id)
             }
             break;
-        
+        case 'OPEN_DOOR':
+            level = {
+                ...level,
+                door: level.doors.map( (d:any) => {
+                    if(d.x === action.payload.x && d.y === action.payload.y) {
+                        action.payload.open = true;
+                        return action.payload;
+                    }
+                    return d;
+                })
+            }
+            break;
         default :
             break;    
     }

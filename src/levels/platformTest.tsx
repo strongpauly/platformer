@@ -1,4 +1,5 @@
 export default {
+    "doors":[],
     "enemies": [{
         "hp": 2,
         "maxX": 0,

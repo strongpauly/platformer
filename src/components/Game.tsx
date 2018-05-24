@@ -1,6 +1,7 @@
 import * as React from 'react';
 import {connect} from 'react-redux';
 import { IPlayer } from '../model/IPlayer';
+import changeLevel from '../state/actions/changeLevel';
 import collectGun from '../state/actions/collectGun';
 import fallMove from '../state/actions/fallMove';
 import fallStart from '../state/actions/fallStart';
@@ -8,6 +9,7 @@ import gameStart from '../state/actions/gameStart';
 import jumpMove from '../state/actions/jumpMove';
 import jumpStart from '../state/actions/jumpStart';
 import killEnemy from '../state/actions/killEnemy';
+import openDoor from '../state/actions/openDoor';
 import playerHit from '../state/actions/playerHit';
 import playerVulnerable from '../state/actions/playerVulnerable';
 import stepMove from '../state/actions/stepMove';
@@ -17,6 +19,7 @@ import updateEnemy from '../state/actions/updateEnemy';
 import { intersects } from '../utils/intersects';
 import { Bullet } from './Bullet';
 import * as Constants from './Constants';
+import { Door } from './Door';
 import { Enemy } from './Enemy';
 import './Game.css';
 import { Gun } from './Gun';
@@ -64,6 +67,9 @@ class Game extends React.Component<any, any> {
         const bullets = this.state.bullets.map( (bullet:any, i:number) => 
             <Bullet key={bullet.id} x={bullet.x} y={bullet.y}/>
         );
+        const doors = level.doors.map( (door:any, i:number) => 
+            <Door key={door.id} x={door.x} y={door.y} open={door.open}/>
+        );
         const gameOver = this.props.player.hp <= 0;
         return (
         <div className="game" ref={this.gameElement}>
@@ -71,6 +77,7 @@ class Game extends React.Component<any, any> {
                 left: this.state.levelOffset,
                 width: this.props.level.width
             }}>
+                {doors}
                 {!gameOver? <Player {...this.props.player}/> : <></>}
                 {platforms}
                 {guns}
@@ -107,6 +114,11 @@ class Game extends React.Component<any, any> {
             }
             this.startEnemies(this.props.level);
             this.currentLevel = this.props.level.name;
+            this.setState({
+                bulletCount: 0,
+                bullets: [],
+                levelOffset: 0
+            });
         }
     }
 
@@ -132,6 +144,23 @@ class Game extends React.Component<any, any> {
             )
             if (powerUp) {
                 this.props.dispatch(collectGun(powerUp))
+            }
+        }
+    }
+
+    private checkDoors() {
+        const door = this.props.level.doors.find( (d: IPosition) => 
+            intersects(this.props.player, {
+                ...d,
+                height: Constants.DOOR_HEIGHT,
+                width: Constants.DOOR_WIDTH
+            })
+        )
+        if (door) {
+            this.props.dispatch(openDoor(door));
+            if (door.to && this.props.player.x + this.props.player.width > door.x + (Constants.DOOR_WIDTH / 2)) {
+                this.finishStep();
+                this.props.dispatch(changeLevel(door.to));
             }
         }
     }
@@ -353,6 +382,7 @@ class Game extends React.Component<any, any> {
                 if (collision.canMove && !isNaN(collision.newY) && collision.newY !== player.y && !player.jumping && stepping) {
                     this.fall();
                 }
+                this.checkDoors();
             }, Constants.STEP_SPEED);
         }
     }

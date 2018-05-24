@@ -1,4 +1,5 @@
 export default {
+    "doors":[],
     "enemies": [],
     "guns": [{
         "x": 18,
@@ -6,5 +7,5 @@ export default {
     }],
     "name": "2",
     "platforms": [],
-    "width": 30
+    "width": 1500
 }
