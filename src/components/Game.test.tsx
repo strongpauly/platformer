@@ -538,7 +538,7 @@ describe("<Game>", () => {
     stepRight(35);
     state = mock.store.getState();
     expect(state.level.doors[0].open).toBeTruthy();
-    stepRight(20);
+    stepRight(35);
     state = mock.store.getState();
     expect(state.level.name).toEqual(levelName);
     wrapper.unmount();

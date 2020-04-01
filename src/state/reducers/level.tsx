@@ -3,8 +3,9 @@ import { parse } from "qs";
 import * as Constants from "../../components/Constants";
 import { IPosition } from "../../components/IPosition";
 import { levels } from "../../levels";
+import { IDoor, ILevel } from "../../model/ILevel";
 
-export function levelReducer(level: any = levels["1"], action: any) {
+export function levelReducer(level: ILevel = levels["1"], action: any) {
   switch (action.type) {
     case "LEVEL_CHANGE":
       level = _.cloneDeep(levels[action.payload]);
@@ -60,10 +61,9 @@ export function levelReducer(level: any = levels["1"], action: any) {
     case "OPEN_DOOR":
       level = {
         ...level,
-        door: level.doors.map((d: any) => {
-          if (d.id === action.payload.id) {
+        doors: level.doors.map((d: IDoor) => {
+          if (d === action.payload) {
             action.payload.open = true;
-            return action.payload;
           }
           return d;
         })

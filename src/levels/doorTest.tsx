@@ -11,5 +11,5 @@ export default {
   guns: [],
   name: "doorTest",
   platforms: [],
-  width: 100
+  width: 150
 };
