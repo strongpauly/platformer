@@ -8,7 +8,7 @@ import { IDoor, ILevel } from "../../model/ILevel";
 export function levelReducer(level: ILevel = levels["1"], action: any) {
   switch (action.type) {
     case "LEVEL_CHANGE":
-      level = _.cloneDeep(levels[action.payload]);
+      level = _.cloneDeep(levels[action.payload.level]);
     case "START":
       level = {
         ...level,
