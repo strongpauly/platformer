@@ -386,6 +386,7 @@ describe("<Game>", () => {
     );
     mock.store.dispatch(changeLevel("platformTest2"));
     let state = mock.store.getState();
+    // const playerStartX = state.player.x;
     expect(state.level.name).toEqual("platformTest2");
     expect(state.player.y).toEqual(0);
     startJump();
@@ -399,12 +400,12 @@ describe("<Game>", () => {
     stopStepRight();
     state = mock.store.getState();
     expect(state.player.y).toEqual(60);
-    expect(state.player.x).toEqual(85);
+    expect(state.player.x).toEqual(110);
     startStepLeft();
     // Move 60px
     jest.advanceTimersByTime(60 * Constants.STEP_SPEED * Constants.STEP_WIDTH);
     state = mock.store.getState();
-    expect(state.player.x).toEqual(25);
+    expect(state.player.x).toEqual(50);
     expect(state.player.y).toEqual(40);
     wrapper.unmount();
   });
