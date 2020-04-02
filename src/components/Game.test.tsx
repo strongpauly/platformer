@@ -112,9 +112,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("2"));
+    mock.store.dispatch(changeLevel("2", "1"));
     const state = mock.store.getState();
-    expect(state.level.name).toEqual("2");
+    expect(state.level.current.name).toEqual("2");
     wrapper.unmount();
   });
 
@@ -157,13 +157,13 @@ describe("<Game>", () => {
       </Provider>
     );
     let state = mock.store.getState();
-    expect(state.level.enemies.length).toBeGreaterThanOrEqual(2);
-    const x0 = state.level.enemies[0].x;
-    const x1 = state.level.enemies[1].x;
+    expect(state.level.current.enemies.length).toBeGreaterThanOrEqual(2);
+    const x0 = state.level.current.enemies[0].x;
+    const x1 = state.level.current.enemies[1].x;
     jest.advanceTimersByTime(Constants.ENEMY_UPDATE_FREQUENCY);
     state = mock.store.getState();
-    expect(state.level.enemies[0].x).not.toEqual(x0);
-    expect(state.level.enemies[1].x).not.toEqual(x1);
+    expect(state.level.current.enemies[0].x).not.toEqual(x0);
+    expect(state.level.current.enemies[1].x).not.toEqual(x1);
 
     wrapper.unmount();
   });
@@ -175,9 +175,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("gunTest"));
+    mock.store.dispatch(changeLevel("gunTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("gunTest");
+    expect(state.level.current.name).toEqual("gunTest");
     expect(state.player.hasGun).toBeFalsy();
     const x = state.player.x;
     startStepRight();
@@ -197,9 +197,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("gunTest"));
+    mock.store.dispatch(changeLevel("gunTest", "1"));
     const state = mock.store.getState();
-    expect(state.level.name).toEqual("gunTest");
+    expect(state.level.current.name).toEqual("gunTest");
     expect(state.player.hasGun).toBeFalsy();
     fireGun();
     jest.advanceTimersByTime(Constants.ANIMATION_FREQUENCY);
@@ -216,9 +216,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("gunTest"));
+    mock.store.dispatch(changeLevel("gunTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("gunTest");
+    expect(state.level.current.name).toEqual("gunTest");
     expect(state.player.hasGun).toBeFalsy();
     const x = state.player.x;
     startStepRight();
@@ -241,9 +241,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("gunTest"));
+    mock.store.dispatch(changeLevel("gunTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("gunTest");
+    expect(state.level.current.name).toEqual("gunTest");
     expect(state.player.hasGun).toBeFalsy();
     const x = state.player.x;
     const steps = 10;
@@ -272,9 +272,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("gunTest"));
+    mock.store.dispatch(changeLevel("gunTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("gunTest");
+    expect(state.level.current.name).toEqual("gunTest");
     expect(state.player.y).toEqual(0);
     startJump();
     jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
@@ -297,9 +297,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("platformTest"));
+    mock.store.dispatch(changeLevel("platformTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("platformTest");
+    expect(state.level.current.name).toEqual("platformTest");
     expect(state.player.y).toEqual(0);
     startJump();
     jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
@@ -322,9 +322,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("platformTest"));
+    mock.store.dispatch(changeLevel("platformTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("platformTest");
+    expect(state.level.current.name).toEqual("platformTest");
     expect(state.player.y).toEqual(0);
     startJump();
     jest.advanceTimersByTime(Constants.JUMP_TIME / 2);
@@ -360,9 +360,9 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("platformTest2"));
+    mock.store.dispatch(changeLevel("platformTest2", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("platformTest2");
+    expect(state.level.current.name).toEqual("platformTest2");
     expect(state.player.y).toEqual(0);
     startJump();
     startStepRight();
@@ -384,10 +384,10 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("platformTest2"));
+    mock.store.dispatch(changeLevel("platformTest2", "1"));
     let state = mock.store.getState();
     // const playerStartX = state.player.x;
-    expect(state.level.name).toEqual("platformTest2");
+    expect(state.level.current.name).toEqual("platformTest2");
     expect(state.player.y).toEqual(0);
     startJump();
     startStepRight();
@@ -417,11 +417,11 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("enemyTest"));
+    mock.store.dispatch(changeLevel("enemyTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("enemyTest");
-    expect(state.level.enemies).toHaveLength(1);
-    expect(state.level.enemies[0].hp).toEqual(2);
+    expect(state.level.current.name).toEqual("enemyTest");
+    expect(state.level.current.enemies).toHaveLength(1);
+    expect(state.level.current.enemies[0].hp).toEqual(2);
     expect(state.player.hasGun).toBeFalsy();
     mock.store.dispatch(collectGun({ x: 0, y: 0, width: 1, height: 1 }));
     state = mock.store.getState();
@@ -429,8 +429,8 @@ describe("<Game>", () => {
     fireGun();
     jest.advanceTimersByTime(1000);
     state = mock.store.getState();
-    expect(state.level.enemies).toHaveLength(1);
-    expect(state.level.enemies[0].hp).toEqual(1);
+    expect(state.level.current.enemies).toHaveLength(1);
+    expect(state.level.current.enemies[0].hp).toEqual(1);
     wrapper.unmount();
   });
 
@@ -441,11 +441,11 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("enemyTest"));
+    mock.store.dispatch(changeLevel("enemyTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("enemyTest");
-    expect(state.level.enemies).toHaveLength(1);
-    expect(state.level.enemies[0].hp).toEqual(2);
+    expect(state.level.current.name).toEqual("enemyTest");
+    expect(state.level.current.enemies).toHaveLength(1);
+    expect(state.level.current.enemies[0].hp).toEqual(2);
     expect(state.player.hasGun).toBeFalsy();
     mock.store.dispatch(collectGun({ x: 0, y: 0, width: 1, height: 1 }));
     state = mock.store.getState();
@@ -455,12 +455,12 @@ describe("<Game>", () => {
     expect(wrapper.find(Bullet)).toHaveLength(1);
     jest.advanceTimersByTime(1000);
     state = mock.store.getState();
-    expect(state.level.enemies).toHaveLength(1);
-    expect(state.level.enemies[0].hp).toEqual(1);
+    expect(state.level.current.enemies).toHaveLength(1);
+    expect(state.level.current.enemies[0].hp).toEqual(1);
     fireGun();
     jest.advanceTimersByTime(1000);
     state = mock.store.getState();
-    expect(state.level.enemies).toHaveLength(0);
+    expect(state.level.current.enemies).toHaveLength(0);
     wrapper.unmount();
   });
 
@@ -471,10 +471,10 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("hitTest"));
+    mock.store.dispatch(changeLevel("hitTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("hitTest");
-    expect(state.level.enemies).toHaveLength(1);
+    expect(state.level.current.name).toEqual("hitTest");
+    expect(state.level.current.enemies).toHaveLength(1);
     expect(state.player.hp).toEqual(3);
     jest.advanceTimersByTime(250);
     state = mock.store.getState();
@@ -507,10 +507,10 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("playerTest"));
+    mock.store.dispatch(changeLevel("playerTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("playerTest");
-    expect(state.level.enemies).toHaveLength(1);
+    expect(state.level.current.name).toEqual("playerTest");
+    expect(state.level.current.enemies).toHaveLength(1);
     expect(state.player.hp).toEqual(3);
     startStepRight();
     jest.advanceTimersByTime(3000);
@@ -529,18 +529,18 @@ describe("<Game>", () => {
         <Game />
       </Provider>
     );
-    mock.store.dispatch(changeLevel("doorTest"));
+    mock.store.dispatch(changeLevel("doorTest", "1"));
     let state = mock.store.getState();
-    expect(state.level.name).toEqual("doorTest");
-    expect(state.level.doors).toHaveLength(1);
-    expect(state.level.doors[0].open).toBeFalsy();
-    const levelName = state.level.doors[0].to;
+    expect(state.level.current.name).toEqual("doorTest");
+    expect(state.level.current.doors).toHaveLength(1);
+    expect(state.level.current.doors[0].open).toBeFalsy();
+    const levelName = state.level.current.doors[0].to;
     stepRight(35);
     state = mock.store.getState();
-    expect(state.level.doors[0].open).toBeTruthy();
+    expect(state.level.current.doors[0].open).toBeTruthy();
     stepRight(35);
     state = mock.store.getState();
-    expect(state.level.name).toEqual(levelName);
+    expect(state.level.current.name).toEqual(levelName);
     wrapper.unmount();
   });
 });

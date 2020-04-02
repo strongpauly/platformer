@@ -1,8 +1,15 @@
 import { IDoor } from "../../model/ILevel";
+import { IAction } from "./IAction";
 
-export default function changeLevel(level: string, through?: IDoor) {
+export type LevelChangeAction = IAction<{
+  to: string;
+  from: string;
+  through?: IDoor;
+}>;
+
+export default function changeLevel(to: string, from: string, through?: IDoor) {
   return {
-    payload: { level, through },
+    payload: { to, from, through },
     type: "LEVEL_CHANGE"
   };
 }

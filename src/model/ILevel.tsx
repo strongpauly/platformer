@@ -28,3 +28,7 @@ export interface ILevel {
   platforms?: IBox[];
   width: number;
 }
+
+export interface ILevelMap {
+  [levelName: string]: ILevel;
+}

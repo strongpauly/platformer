@@ -1,3 +1,4 @@
+import { ILevelMap } from "../model/ILevel";
 import one from "./1";
 import two from "./2";
 import three from "./3";
@@ -9,7 +10,7 @@ import platformTest from "./platformTest";
 import platformTest2 from "./platformTest2";
 import playerTest from "./playerTest";
 
-export const levels = {
+export const levels: ILevelMap = {
   1: one,
   2: two,
   3: three,

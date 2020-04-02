@@ -176,7 +176,7 @@ class Game extends React.Component<IGameProps, any> {
           door.x + Constants.DOOR_WIDTH / 2
       ) {
         this.finishStep();
-        this.props.dispatch(changeLevel(door.to));
+        this.props.dispatch(changeLevel(door.to, this.props.level.name, door));
       }
     }
   }
@@ -515,8 +515,8 @@ class Game extends React.Component<IGameProps, any> {
 }
 
 export default connect((state: any) => {
-  const gameProps: any = {};
+  const gameProps: Partial<IGameProps> = {};
   gameProps.player = state.player;
-  gameProps.level = state.level;
+  gameProps.level = state.level.current;
   return gameProps;
 })(Game);

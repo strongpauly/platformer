@@ -1,5 +1,7 @@
 import * as Constants from "../../components/Constants";
+import { levels } from "../../levels";
 import { IPlayer } from "../../model/IPlayer";
+import { LevelChangeAction } from "../actions/changeLevel";
 import { IAction } from "../actions/IAction";
 
 const playerDefault = {
@@ -24,8 +26,22 @@ export function playerReducer(
 ) {
   switch (action.type) {
     case "START":
-    case "LEVEL_CHANGE":
       player = { ...playerDefault };
+      break;
+    case "LEVEL_CHANGE":
+      let { x } = playerDefault;
+      const levelChangeAction = action as LevelChangeAction;
+      if (levelChangeAction.payload.through) {
+        const toLevel = levels[levelChangeAction.payload.to];
+        const fromDoor = toLevel.doors.find(
+          door => door.to === levelChangeAction.payload.from
+        );
+        console.log(fromDoor);
+        if (fromDoor) {
+          x = fromDoor.x + (player.inverted ? -player.width : player.width);
+        }
+      }
+      player = { ...player, x };
       break;
     case "COLLECT_GUN":
       player = {

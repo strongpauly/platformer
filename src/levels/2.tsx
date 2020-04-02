@@ -13,12 +13,7 @@ export default {
     }
   ],
   enemies: [],
-  guns: [
-    {
-      x: 50,
-      y: 0
-    }
-  ],
+  guns: [],
   name: "2",
   platforms: [],
   width: 1500
