@@ -5,6 +5,7 @@ import changeLevel from "../state/actions/changeLevel";
 import collectGun from "../state/actions/collectGun";
 import fallMove from "../state/actions/fallMove";
 import fallStart from "../state/actions/fallStart";
+import fireGun from "../state/actions/fireGun";
 import gameStart from "../state/actions/gameStart";
 import jumpMove from "../state/actions/jumpMove";
 import jumpStart from "../state/actions/jumpStart";
@@ -27,6 +28,7 @@ import { IPosition } from "./IPosition";
 import { IShape } from "./IShape";
 import { Platform } from "./Platform";
 import { Player } from "./Player";
+import { PlayerSummary } from "./PlayerSummary";
 
 interface ICollision {
   shape: IShape | null;
@@ -59,7 +61,7 @@ class Game extends React.Component<IGameProps, any> {
   }
 
   public render() {
-    const level = this.props.level;
+    const { level, player } = this.props;
     const platforms = level.platforms.map((platform: IShape, i: number) => (
       <Platform
         key={i}
@@ -81,23 +83,24 @@ class Game extends React.Component<IGameProps, any> {
     const doors = level.doors.map((door: any, i: number) => (
       <Door key={i} x={door.x} y={door.y} open={door.open} />
     ));
-    const gameOver = this.props.player.hp <= 0;
+    const gameOver = player.hp <= 0;
     return (
       <div className="game" ref={this.gameElement}>
         <div
           className="scrollContainer"
           style={{
             left: this.state.levelOffset,
-            width: this.props.level.width
+            width: level.width
           }}
         >
           {doors}
-          {!gameOver ? <Player {...this.props.player} /> : <></>}
+          {!gameOver ? <Player {...player} /> : <></>}
           {platforms}
           {guns}
           {bullets}
           {enemies}
         </div>
+        <PlayerSummary player={player} />
         {gameOver ? <div className="gameOver">GAME OVER</div> : <></>}
       </div>
     );
@@ -232,6 +235,7 @@ class Game extends React.Component<IGameProps, any> {
         bulletCount: this.state.bulletCount + 1,
         bullets: this.state.bullets.concat(bullet)
       });
+      this.props.dispatch(fireGun());
       bullet.bulletInterval = setInterval(() => {
         let newBullets = this.state.bullets;
         const newX = bullet.x + bulletIncrement;

@@ -5,6 +5,7 @@ import { LevelChangeAction } from "../actions/changeLevel";
 import { IAction } from "../actions/IAction";
 
 const playerDefault = {
+  bullets: 0,
   falling: false,
   hasGun: false,
   height: Constants.PLAYER_HEIGHT,
@@ -13,6 +14,7 @@ const playerDefault = {
   invulnerable: false,
   jumpPercent: NaN,
   jumping: false,
+  score: 0,
   stepStart: NaN,
   stepping: false,
   width: Constants.PLAYER_WIDTH,
@@ -46,7 +48,16 @@ export function playerReducer(
     case "COLLECT_GUN":
       player = {
         ...player,
+        bullets: player.bullets + 20,
         hasGun: true
+      };
+      break;
+    case "FIRE_GUN":
+      const newBullets = player.bullets - action.payload;
+      player = {
+        ...player,
+        bullets: newBullets < 0 ? 0 : newBullets,
+        hasGun: newBullets > 0
       };
       break;
     case "FALL_START":
@@ -111,6 +122,12 @@ export function playerReducer(
         stepping: false
       };
       break;
+    case "KILL_ENEMY": {
+      player = {
+        ...player,
+        score: player.score + 100
+      };
+    }
     default:
       break;
   }
