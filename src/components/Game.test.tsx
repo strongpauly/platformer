@@ -423,7 +423,7 @@ describe("<Game>", () => {
     expect(state.level.current.enemies).toHaveLength(1);
     expect(state.level.current.enemies[0].hp).toEqual(2);
     expect(state.player.hasGun).toBeFalsy();
-    mock.store.dispatch(collectGun({ x: 0, y: 0, width: 1, height: 1 }));
+    mock.store.dispatch(collectGun({ x: 0, y: 0 }));
     state = mock.store.getState();
     expect(state.player.hasGun).toBeTruthy();
     fireGun();
@@ -447,7 +447,7 @@ describe("<Game>", () => {
     expect(state.level.current.enemies).toHaveLength(1);
     expect(state.level.current.enemies[0].hp).toEqual(2);
     expect(state.player.hasGun).toBeFalsy();
-    mock.store.dispatch(collectGun({ x: 0, y: 0, width: 1, height: 1 }));
+    mock.store.dispatch(collectGun({ x: 0, y: 0 }));
     state = mock.store.getState();
     expect(state.player.hasGun).toBeTruthy();
     fireGun();

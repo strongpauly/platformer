@@ -1,4 +1,4 @@
-import { IShape } from "../components/IShape";
+import { IShape } from "./IShape";
 
 export interface IPlayer extends IShape {
   bullets: number;

@@ -1,9 +1,9 @@
 import * as _ from "lodash";
 import { parse } from "qs";
 import * as Constants from "../../components/Constants";
-import { IPosition } from "../../components/IPosition";
 import { levels } from "../../levels";
 import { IDoor, ILevel, ILevelMap } from "../../model/ILevel";
+import { IPosition } from "../../model/IPosition";
 
 interface ILevels {
   current: ILevel;

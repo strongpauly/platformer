@@ -1,7 +1,9 @@
 import * as React from "react";
 import { connect, Dispatch } from "react-redux";
-import { ILevel } from "../model/ILevel";
+import * as ILevel from "../model/ILevel";
 import { IPlayer } from "../model/IPlayer";
+import { IPosition } from "../model/IPosition";
+import { IShape } from "../model/IShape";
 import changeLevel from "../state/actions/changeLevel";
 import collectGun from "../state/actions/collectGun";
 import fallMove from "../state/actions/fallMove";
@@ -25,8 +27,6 @@ import { Door } from "./Door";
 import { Enemy } from "./Enemy";
 import "./Game.css";
 import { Gun } from "./Gun";
-import { IPosition } from "./IPosition";
-import { IShape } from "./IShape";
 import { Platform } from "./Platform";
 import { Player } from "./Player";
 import { PlayerSummary } from "./PlayerSummary";
@@ -41,7 +41,7 @@ interface ICollision {
 interface IGameProps {
   dispatch: Dispatch<any>;
   player: IPlayer;
-  level: any;
+  level: ILevel.IInitializedLevel;
 }
 class Game extends React.Component<IGameProps, any> {
   private stepInterval: any;
@@ -75,7 +75,7 @@ class Game extends React.Component<IGameProps, any> {
     const enemies = level.enemies.map((enemy: any, i: number) => (
       <Enemy key={i} {...enemy} />
     ));
-    const guns = level.guns.map((gun: IPosition, i: number) => (
+    const guns = level.guns.map((gun: ILevel.IGun, i: number) => (
       <Gun key={i} x={gun.x} y={gun.y} />
     ));
     const bullets = this.state.bullets.map((bullet: any, i: number) => (
@@ -143,13 +143,13 @@ class Game extends React.Component<IGameProps, any> {
     }
   }
 
-  private startEnemies(level: ILevel) {
+  private startEnemies(level: ILevel.IInitializedLevel) {
     this.enemyInterval = setInterval(() => {
       this.moveEnemies();
     }, Constants.ENEMY_UPDATE_FREQUENCY);
   }
 
-  private stopEnemies(level: ILevel) {
+  private stopEnemies(level: ILevel.IInitializedLevel) {
     clearInterval(this.enemyInterval);
   }
 
@@ -438,24 +438,26 @@ class Game extends React.Component<IGameProps, any> {
   }
 
   private bulletIntersects(shape: IShape): IShape | undefined {
-    let collided = this.props.level.platforms.find((platform: IShape) => {
-      return intersects(shape, platform);
-    });
-    if (collided) {
-      return collided;
-    }
-    collided = this.props.level.enemies.find((platform: IShape) => {
-      return intersects(shape, platform);
-    });
-    if (collided) {
-      collided.hp--;
-      if (collided.hp > 0) {
-        this.hitEnemy(collided);
-      } else {
-        clearInterval(collided.movementInterval);
-        this.props.dispatch(killEnemy(collided));
+    const collidedPlatform = this.props.level.platforms.find(
+      (platform: IShape) => {
+        return intersects(shape, platform);
       }
-      return collided;
+    );
+    if (collidedPlatform) {
+      return collidedPlatform;
+    }
+    const collidedEnemy = this.props.level.enemies.find(enemy => {
+      return intersects(shape, enemy);
+    });
+    if (collidedEnemy) {
+      collidedEnemy.hp--;
+      if (collidedEnemy.hp > 0) {
+        this.hitEnemy(collidedEnemy);
+      } else {
+        clearInterval(collidedEnemy.movementInterval);
+        this.props.dispatch(killEnemy(collidedEnemy));
+      }
+      return collidedEnemy;
     }
     return;
   }
@@ -504,9 +506,11 @@ class Game extends React.Component<IGameProps, any> {
       return collision;
     }
     // Enemies shouldn't overlap
-    const enemy = this.props.level.enemies.find((e: IShape) => {
-      return intersects(player, e);
-    });
+    const enemy = this.props.level.enemies.find(
+      (e: ILevel.IInitializedEnemy) => {
+        return intersects(player, e);
+      }
+    );
     if (enemy) {
       collision.shape = enemy;
       collision.isEnemy = true;

@@ -1,3 +1,11 @@
 {
-  "jest.pathToJest": "npm run test --"
+  "jest.pathToJest": "npm run test --",
+  "typescript.extension.sortImports.quoteStyle": "double",
+  "typescript.extension.sortImports.sortOnSave": true,
+  "typescript.extension.sortImports.sortMethod": "path",
+  "typescript.extension.sortImports.pathSortOrder": [
+    "package",
+    "relativeUpLevel",
+    "relativeDownLevel"
+  ]
 }

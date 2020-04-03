@@ -48,7 +48,7 @@ export function playerReducer(
     case "COLLECT_GUN":
       player = {
         ...player,
-        bullets: player.bullets + 20,
+        bullets: player.bullets + (action.payload.bullets || 20),
         hasGun: true
       };
       break;
