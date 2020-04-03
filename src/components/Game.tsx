@@ -132,13 +132,14 @@ class Game extends React.Component<IGameProps, any> {
     if (!this.currentLevel || this.currentLevel !== this.props.level.name) {
       if (this.currentLevel) {
         this.stopEnemies(prevProps.level);
+        setTimeout(() => this.checkScroll(), 0);
       }
       this.startEnemies(this.props.level);
       this.currentLevel = this.props.level.name;
       this.setState({
         bulletCount: 0,
-        bullets: [],
-        levelOffset: 0
+        bullets: []
+        // levelOffset: 0
       });
     }
   }
@@ -422,6 +423,19 @@ class Game extends React.Component<IGameProps, any> {
         }
         this.checkDoors();
       }, Constants.STEP_SPEED);
+    }
+  }
+
+  private checkScroll() {
+    if (this.gameElement.current) {
+      const { level, player } = this.props;
+      const viewWidth = this.gameElement.current.offsetWidth;
+      let levelOffset = 0;
+      const playerRight = player.x + player.width + 40;
+      if (level.width > viewWidth && playerRight > viewWidth) {
+        levelOffset = -(playerRight - viewWidth);
+      }
+      this.setState({ levelOffset });
     }
   }
 
