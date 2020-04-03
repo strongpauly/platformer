@@ -1,5 +1,6 @@
 import * as React from "react";
 import { connect, Dispatch } from "react-redux";
+import { ILevel } from "../model/ILevel";
 import { IPlayer } from "../model/IPlayer";
 import changeLevel from "../state/actions/changeLevel";
 import collectGun from "../state/actions/collectGun";
@@ -142,18 +143,18 @@ class Game extends React.Component<IGameProps, any> {
     }
   }
 
-  private startEnemies(level: any) {
+  private startEnemies(level: ILevel) {
     this.enemyInterval = setInterval(() => {
       this.moveEnemies();
     }, Constants.ENEMY_UPDATE_FREQUENCY);
   }
 
-  private stopEnemies(level: any) {
+  private stopEnemies(level: ILevel) {
     clearInterval(this.enemyInterval);
   }
 
   private checkPowerUps() {
-    if (!this.props.player.hasGun && this.props.level.guns) {
+    if (this.props.level.guns) {
       const powerUp = this.props.level.guns.find((gun: IPosition) =>
         intersects(this.props.player, {
           ...gun,
