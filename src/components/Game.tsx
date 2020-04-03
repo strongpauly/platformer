@@ -101,7 +101,7 @@ class Game extends React.Component<IGameProps, any> {
           {bullets}
           {enemies}
         </div>
-        <PlayerSummary player={player} />
+        <PlayerSummary player={player} level={level} />
         {gameOver ? <div className="gameOver">GAME OVER</div> : <></>}
       </div>
     );
